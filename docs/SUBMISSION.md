@@ -106,8 +106,7 @@ canvas, SQLite.
 
 ## Links
 
-- Repo: https://github.com/zalkabsi/ACCLAMATION (private — share with
-  `testing@devpost.com`)
+- Repo: https://github.com/zalkabsi/ACCLAMATION (public)
 - Video: `<YouTube URL, public>`
 - Demo (offline): `npm test && npm run replay`
 
@@ -127,15 +126,16 @@ canvas, SQLite.
 
 ## Repository sharing
 
-The repo may be private, but **must be shared with `testing@devpost.com`**.
-GitHub: Settings → Collaborators → Add people → `testing@devpost.com`
-(if the account is not found, use the email invite link and keep the repo private).
-Double-check the invitation is accepted before the deadline.
+The repo is **public**, so judges and `testing@devpost.com` can read it without
+an invitation. Verify it in a logged-out/incognito window before submitting —
+a repo that was private when the link was copied is the classic silent failure.
+If it ever needs to go private again, invite `testing@devpost.com` as a
+collaborator and confirm the invitation is accepted.
 
 ## Submission checklist
 
 - [ ] Repo contains source, fixtures, `AGENTS.md`, README, `.env.example`
-- [ ] Repo is public **or** shared with `testing@devpost.com`
+- [x] Repo is public (re-check in a logged-out window)
 - [ ] `npm test` green from a clean clone (no `node_modules` needed)
 - [ ] `npm run replay` works with no API key
 - [ ] 3-minute video uploaded to YouTube, public, shows the overlay running and
