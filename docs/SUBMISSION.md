@@ -145,7 +145,7 @@ arrives over a real EventSub socket.
   - `channel.chat.message_delete` — same condition (`user:read:chat`)
   - `channel.raid` — `to_broadcaster_user_id`, no scope
   - `channel.subscribe` — `broadcaster_user_id`, `channel:read:subscriptions`
-- **Facebook-free delivery to the streamer.** Events go to the dashboard and the
+- **Delivery without posting to chat.** Events go to the dashboard and the
   OBS overlay over local SSE. Acclamation never posts to chat: audio is produced
   by the overlay page itself, which keeps it outside chatbot review and makes the
   demo work on any channel without bot permissions.
