@@ -19,6 +19,10 @@ argue with each other.
 
 <p align="center"><em>Split mode: two faces, two voices, two colours. 43% vs 29%.</em></p>
 
+![Acclamation control room](docs/dashboard.png)
+
+<p align="center"><em>The control room: ask the room, force a dissent, pin lore, and see exactly what was held back.</em></p>
+
 ---
 
 ## Why this is not a chatbot
