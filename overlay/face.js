@@ -83,7 +83,7 @@ function resize() {
 
 function particleCount() {
   const area = view.w * view.h;
-  return Math.max(650, Math.min(2000, Math.round(area / 1050)));
+  return Math.max(800, Math.min(2000, Math.round(area / 950)));
 }
 
 function buildParticles() {
@@ -161,6 +161,14 @@ function buildFacePoints() {
         points.push({ nx: (x - W / 2) / (W / 2), ny: (y - H / 2) / (H / 2) });
       }
     }
+  }
+
+  // Shuffle so a particle count smaller than the sampled point count still
+  // covers the whole face. Without this, particles index row-by-row and small
+  // viewports only ever render the top half of the mask.
+  for (let i = points.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [points[i], points[j]] = [points[j], points[i]];
   }
   state.facePoints = points;
 }
