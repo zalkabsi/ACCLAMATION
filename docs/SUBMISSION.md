@@ -93,6 +93,35 @@ offline in about 1.5 seconds. **Codex session ID:** `<paste from /status>`.
 - A live-leg doctor that refuses to say "working" until a real chat message
   arrives over the socket.
 
+## What we learned
+
+- **Consensus is easy to fake and hard to measure.** The first clusterer used
+  IDF-weighted centroids; as a cluster filled up, similarity to its own centroid
+  diluted and nine people making the same joke split into seven "stances". Stemmed
+  token matching against cluster prototypes fixed most of it, and shrinking
+  confidence toward 50% on small samples made the numbers smaller — and true.
+  A demo that reports 43/29 is more convincing than one that reports 96%.
+- **Grounding is an architecture decision, not a prompt line.** "Never invent
+  quotes" eventually fails if the model writes the quote. Making the model cite
+  message ids and resolving the username and text locally turned the promise into
+  a validator: invented ids are rejected, retried once, then replaced by the local
+  voice. The audience never sees model-authored attribution.
+- **Deletion is a systems problem.** A deleted message must be removed from the
+  window, tombstoned so it cannot be re-added, excluded before clustering, absent
+  from the prompt, and impossible to resolve as a receipt — with a test asserting
+  the deleted fixture id never appears in an answer. Any one of those layers alone
+  is a bug waiting for the worst possible moment.
+- **Build the network boundary first.** The fake EventSub server (handshake,
+  welcome, keepalive, reconnect, revocation) meant the overlay, clustering and
+  dashboard never waited on Twitch credentials, and the reconnect state machine
+  was tested in milliseconds instead of during a stream. The harness is why the
+  live leg is a 20-minute setup instead of a day of blocked work.
+- **Refusal is a feature, and latency is composition.** Under four chatters
+  Acclamation says "that is not a crowd yet" and never calls the model; in
+  rehearsal that became the most trustworthy beat. And the face starts forming on
+  the trigger, before the model call — if the audience ever sees a spinner, the
+  product feels like an API instead of a character.
+
 ## What's next
 
 Embedding-based clustering; `channel.ban` for instant timeout scrubbing;
