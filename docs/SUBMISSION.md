@@ -70,6 +70,111 @@ then the overlay and dashboard. The tests were the review mechanism: every
 invariant in `AGENTS.md` has a test, and the fake server means the suite runs
 offline in about 1.5 seconds. **Codex session ID:** `<paste from /status>`.
 
+## Devpost long answers
+
+### How Acclamation meets the main technology requirement
+
+The requirement has two halves — build **for Twitch streamers and their
+community**, and build it **with OpenAI Codex** — and both are load-bearing
+rather than decorative.
+
+**Twitch is the product surface.** Acclamation authenticates through Twitch
+OAuth, opens a real EventSub WebSocket session, and consumes
+`channel.chat.message`, `channel.chat.message_delete`, `channel.raid` and
+`channel.subscribe` live. The two types that define the product — live chat and
+message deletion — do not exist offline, so there is no sample-data version of
+this app: without the socket there is no crowd to collapse. It ships as an OBS
+browser-source overlay, which means no Extension review and no chatbot review;
+the streamer installs a URL and talks to their chat.
+
+**Codex is the build method.** The repository is structured to be built by a
+Codex thread. `AGENTS.md` is the thread contract: OAuth scopes, EventSub
+subscription versions and conditions, the five non-negotiable safety invariants,
+the latency budget, and the file map. Before any UI existed, Codex built a fake
+EventSub WebSocket server (RFC 6455 handshake, welcome/keepalive/reconnect/
+revocation) so the entire product could be developed and tested without Twitch
+credentials. Every invariant in `AGENTS.md` has a test; the suite (74 tests, no
+network, no API key) was the review gate for the whole build. The submitted
+Codex session ID is the thread where that happened.
+
+**AI is the product, not a feature.** The model writes the crowd's voice and,
+in split mode, both arguing voices. It is deliberately not trusted with facts:
+the stance share is computed by clustering, receipts are message IDs resolved
+locally, and a validator rejects invented IDs, URLs and mode changes. Remove the
+model and you still have a measurement tool; remove the measurement and the
+voices are fiction. Both are required.
+
+### How we used Codex
+
+1. **Contract first.** The first artifact in the thread was `AGENTS.md` — scopes,
+   EventSub message flow, reconnect rules, safety invariants, latency budget.
+   Codex worked from that file, not from a prompt in a chat window.
+2. **Network boundary second.** Codex wrote the fake EventSub server and the
+   production WebSocket client together, so the reconnect/keepalive state
+   machine could be tested in milliseconds and no work waited on credentials.
+3. **Pipeline third, test-first.** The scrubber, rolling window, clustering and
+   confidence were built with tests for deleted messages, links, PII, bots,
+   floods, split detection and refusal. The strict JSON contract and its
+   grounding validator came next, with a repair-then-fallback path.
+4. **Visible surface last.** The canvas glyph-face overlay and the dashboard were
+   built against the replay harness (`npm run replay -- --serve`) and verified
+   from screenshots at 1080p and 720p; that is how the small-viewport mask bug
+   was caught.
+5. **Verification loop.** `npm test` and the replay fixtures became the review
+   mechanism: every change had to keep all 74 tests green, and CI runs the suite
+   on Node 22.19 and 24.
+
+The thread also produced the live-leg operator tooling: `npm run auth` (OAuth)
+and `npm run doctor`, which refuses to report success until a real chat message
+arrives over a real EventSub socket.
+
+### How Acclamation connects to Twitch
+
+- **OAuth (Authorization Code).** `npm run auth` opens Twitch's consent page on
+  `http://localhost:8917/callback`, requests `user:read:chat` and
+  `channel:read:subscriptions`, and writes a local, gitignored token. The token
+  must belong to the channel being read; the doctor enforces that.
+- **EventSub WebSocket** (`wss://eventsub.wss.twitch.tv/ws`). The first frame is
+  `session_welcome`, carrying the session ID and keepalive window. If no
+  notification or keepalive arrives in that window, the client reconnects; if
+  Twitch sends `session_reconnect`, the client connects to the new URL, waits
+  for its welcome, then closes the old socket so nothing is dropped.
+- **Helix.** Subscriptions are created with
+  `POST /helix/eventsub/subscriptions`, each bound to the WebSocket session ID:
+  - `channel.chat.message` — `broadcaster_user_id`, `user_id` (`user:read:chat`)
+  - `channel.chat.message_delete` — same condition (`user:read:chat`)
+  - `channel.raid` — `to_broadcaster_user_id`, no scope
+  - `channel.subscribe` — `broadcaster_user_id`, `channel:read:subscriptions`
+- **Facebook-free delivery to the streamer.** Events go to the dashboard and the
+  OBS overlay over local SSE. Acclamation never posts to chat: audio is produced
+  by the overlay page itself, which keeps it outside chatbot review and makes the
+  demo work on any channel without bot permissions.
+
+### Products used
+
+| Product | What it does in Acclamation |
+| --- | --- |
+| **OpenAI Codex** | The build agent: one thread, `AGENTS.md` as the contract, test-first iteration, protocol work, overlay and dashboard. Session ID submitted with the project. |
+| **OpenAI API — Chat Completions** | Turns measured clusters and sample message IDs into the single stance, or the two voices in split mode. Strict JSON only; default model `gpt-4o-mini`, any OpenAI-compatible endpoint configurable. |
+| **OpenAI Text-to-Speech** (optional) | Streams the answer voice to the overlay through a local `/api/tts` proxy when `TTS_PROVIDER=openai`. The default is the browser's speech synthesis, so the demo needs no second key. |
+| **Twitch EventSub** | Real-time chat, message deletion, raids and subscriptions — the live data that becomes glyphs, stances and receipts. |
+| **Twitch Helix** | Creates and deletes the EventSub subscriptions and resolves the broadcaster's channel. |
+| **Twitch OAuth** | Authorization-code login, scope grants, token validation and refresh. |
+| **Twitch chat** | The content itself: every message is a glyph, a cluster vote, or a receipt. |
+| **OBS Studio** | Captures the overlay as a transparent browser source, including its audio. |
+| **Node.js 22.19+** | Runtime for the EventSub client, HTTP server, OAuth flow, replay harness and doctor; uses the built-in WebSocket client, `node:http` and `node:sqlite`. |
+| **SQLite (`node:sqlite`)** | Persists channel lore, every call and the Streamer-vs-Chat scoreboard; falls back to memory if unavailable. |
+| **Canvas 2D** | Renders the 800–2,000 glyph swarm and the face mask it converges into. |
+| **GitHub + Actions** | Public repo for judging and CI (tests on Node 22.19 and 24, plus a replay smoke run). |
+
+No Twitch Extension, bot framework or chat-posting library is used — that is a
+deliberate scope choice, not an omission.
+
+> **Before submitting:** replace the session ID with the real one from `/status`,
+> and only keep the "Codex built most of this" wording if it matches your actual
+> thread. The repo, the contract and the tests are real either way; the claim
+> must be too.
+
 ## Challenges
 
 - **Making consensus falsifiable.** Lexical clustering over-splits short chat;
