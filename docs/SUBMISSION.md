@@ -116,11 +116,14 @@ offline in about 1.5 seconds. **Codex session ID:** `<paste from /status>`.
   dashboard never waited on Twitch credentials, and the reconnect state machine
   was tested in milliseconds instead of during a stream. The harness is why the
   live leg is a 20-minute setup instead of a day of blocked work.
-- **Refusal is a feature, and latency is composition.** Under four chatters
-  Acclamation says "that is not a crowd yet" and never calls the model; in
-  rehearsal that became the most trustworthy beat. And the face starts forming on
-  the trigger, before the model call — if the audience ever sees a spinner, the
-  product feels like an API instead of a character.
+- **Refusal is a feature.** Under four chatters Acclamation says "that is not a
+  crowd yet" and never calls the model. It started as a safety rule; in rehearsal
+  it became the most trustworthy beat in the demo — the one moment the audience
+  believes the numbers.
+- **Latency is composition.** The face starts forming on the trigger, before the
+  model call finishes. If the audience ever sees a spinner, the product feels like
+  an API instead of a character — so the animation is part of the architecture,
+  not polish.
 
 ## What's next
 
