@@ -60,7 +60,7 @@ Requires **Node 22.19+**. There are no dependencies to install (the runtime is
 Node's built-in WebSocket, HTTP and SQLite).
 
 ```bash
-npm test                                  # 66 tests, no network
+npm test                                  # 74 tests, no network
 npm run replay                            # consensus fixture through the whole pipeline
 npm run replay -- --fixture replay/fixtures/dissent.jsonl
 npm run replay -- --fixture replay/fixtures/messy.jsonl
@@ -199,12 +199,14 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 
 | Claim | Status |
 | --- | --- |
-| 66 tests, no network, no API key | ✅ `npm test` |
+| 74 tests, no network, no API key | ✅ `npm test` |
+| Runs on Node 22.19 (minimum) through Node 25 | ✅ full suite executed on 22.19 and 25; CI matrix covers 22.19 + 24 |
 | Real EventSub client against a real WebSocket implementation (fake server) | ✅ `test/eventsub.test.js` |
 | Reconnect + keepalive-watchdog paths | ✅ tested at sub-second keepalives |
 | Full pipeline through replay fixtures, including delete-scrubbing | ✅ `test/replay.test.js` |
 | Overlay renders consensus and dissent faces | ✅ captured in headless Chrome (`docs/*.png`) |
 | Grounding rejects invented ids and URLs; falls back to the local voice | ✅ `test/contract.test.js`, `test/session.test.js` |
+| Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
 | Live Twitch leg (real token, real channel, real message) | ⏳ **not run in this environment** — credentials were not available. `npm run doctor` is the gate and exits 0 only after a real message arrives. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
 | TTS on stage | ⏳ browser voice works headless-tested only for wiring; judge on the machine that will stream |
@@ -228,7 +230,7 @@ web/                      control-room dashboard
 replay/                   fake EventSub server + JSONL fixtures
 scripts/                  OAuth and the live doctor
 docs/                     demo script, safety notes, submission copy, screenshots
-test/                     66 tests
+test/                     74 tests
 ```
 
 ## Demo

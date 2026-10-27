@@ -41,7 +41,7 @@ This file is the contract for anyone (human or Codex) changing the code.
 
 | Command | What it does |
 | --- | --- |
-| `npm test` | 66 tests, no network, ~1.5s |
+| `npm test` | 74 tests, no network, ~1.5s |
 | `npm start` | dashboard on `http://127.0.0.1:8787`, overlay on `/overlay` |
 | `npm run replay` | offline fixture through the real EventSub client + full pipeline |
 | `npm run replay -- --fixture replay/fixtures/dissent.jsonl` | split-mode demo |
@@ -120,7 +120,7 @@ configuration on purpose; authorize the channel you stream on.
 | `overlay/` | canvas glyph swarm, face mask, dissent fracture, SSE |
 | `web/` | control room dashboard |
 | `scripts/auth.js`, `scripts/doctor.js` | OAuth and the day-one gate |
-| `test/` | 66 tests, network-free |
+| `test/` | 74 tests, network-free |
 
 Request flow:
 
@@ -155,6 +155,8 @@ glyphs reacting before the text lands. The face must never wait on the model.
 
 ## Testing
 
+- `test/helix.test.js` pins the subscription type/condition/transport shapes the live
+  leg depends on, without needing a Twitch token.
 - `test/eventsub.test.js` runs the production client against the fake server,
   including reconnect and keepalive-watchdog paths (sub-second keepalives are a
   test affordance; real Twitch enforces ≥10s).

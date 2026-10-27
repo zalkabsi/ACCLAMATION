@@ -88,7 +88,7 @@ export class HelixClient {
 }
 
 /** Every subscription type Chorus reads, with its required condition/scopes. */
-export function chatSubscriptions({ broadcasterUserId, userId, hasSubscriptionScope }) {
+export function chatSubscriptions({ broadcasterUserId, userId }) {
   const subscriptions = [
     {
       type: 'channel.chat.message',
@@ -106,23 +106,17 @@ export function chatSubscriptions({ broadcasterUserId, userId, hasSubscriptionSc
       scope: null,
     },
   ];
-  if (hasSubscriptionScope) {
-    subscriptions.push({
-      type: 'channel.subscribe',
-      condition: { broadcaster_user_id: broadcasterUserId },
-      scope: 'channel:read:subscriptions',
-    });
-  }
+  subscriptions.push({
+    type: 'channel.subscribe',
+    condition: { broadcaster_user_id: broadcasterUserId },
+    scope: 'channel:read:subscriptions',
+  });
   return subscriptions;
 }
 
 export async function subscribeAll({ helix, sessionId, broadcasterUserId, userId, scopes = [], logger }) {
   const results = [];
-  for (const subscription of chatSubscriptions({
-    broadcasterUserId,
-    userId,
-    hasSubscriptionScope: scopes.includes('channel:read:subscriptions'),
-  })) {
+  for (const subscription of chatSubscriptions({ broadcasterUserId, userId })) {
     if (subscription.scope && !scopes.includes(subscription.scope)) {
       results.push({ ...subscription, status: 'skipped', reason: `missing scope ${subscription.scope}` });
       continue;

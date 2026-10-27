@@ -87,7 +87,7 @@ offline in about 1.5 seconds. **Codex session ID:** `<paste from /status>`.
 
 - A split-mode moment that is genuinely new on a Twitch stream: one chat, two
   voices, one face breaking in half.
-- 66 tests covering clustering, ingestion filters, the JSON contract, the
+- 74 tests covering clustering, ingestion filters, the JSON contract, the
   EventSub state machine (including reconnect and keepalive watchdog) and the
   full replay pipeline.
 - A live-leg doctor that refuses to say "working" until a real chat message
@@ -147,7 +147,7 @@ canvas, SQLite.
 ## Judge test instructions (put this in the Devpost description or a pinned file)
 
 1. `git clone` the repo; Node 22.19+.
-2. `npm test` → 66 tests pass, no network, no API key.
+2. `npm test` → 74 tests pass, no network, no API key.
 3. `npm run replay` → prints a measured consensus answer with receipts and
    held-back counts.
 4. `npm run replay -- --fixture replay/fixtures/dissent.jsonl` → split mode.
