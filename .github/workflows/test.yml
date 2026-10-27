@@ -1,0 +1,19 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Tests (no network, no keys)
+        run: npm test
+      - name: Replay a fixture through the production pipeline
+        run: npm run replay -- --fixture replay/fixtures/consensus.jsonl --speed 100000

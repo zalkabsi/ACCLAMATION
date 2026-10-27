@@ -1,0 +1,17 @@
+// Messy: most of the room is spam, links and bot noise. The safe answer is to
+// refuse — there are not enough real opinions to speak for.
+{"t":0,"type":"chat","id":"x01","user":"spammer1","text":"FREE FOLLOWERS discord.gg/xyz"}
+{"t":100,"type":"chat","id":"x02","user":"spammer2","text":"check https://example.com/bits"}
+{"t":200,"type":"chat","id":"x03","user":"spammer3","text":"www.sketchy-shop.example"}
+{"t":300,"type":"chat","id":"x04","user":"spammer4","text":"email me at bot@example.com"}
+{"t":400,"type":"chat","id":"x05","user":"spammer5","text":"call 555-123-4567 for cheap views"}
+{"t":500,"type":"chat","id":"x06","user":"streamelements","text":"Welcome to the stream!"}
+{"t":600,"type":"chat","id":"x07","user":"sery_bot","text":"Follow bot protection active"}
+{"t":700,"type":"chat","id":"x08","user":"viewer","text":"!points"}
+{"t":800,"type":"chat","id":"x09","user":"viewer2","text":"!lurk"}
+{"t":900,"type":"chat","id":"x10","user":"real1","text":"choke at 20 honestly"}
+{"t":1000,"type":"chat","id":"x11","user":"real2","text":"20 kills him"}
+{"t":1100,"type":"chat","id":"x12","user":"real3","text":"what"}
+{"t":1200,"type":"chat","id":"x13","user":"real1","text":"choke at 20 honestly"}
+{"t":1300,"type":"chat","id":"x14","user":"real1","text":"choke at 20 honestly"}
+{"t":1400,"type":"chat","id":"x15","user":"real2","text":"20 kills him"}

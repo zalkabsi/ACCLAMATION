@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acclamation — control room</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><i class="dot"></i> ACCLAMATION</div>
+      <div class="meta">
+        <span id="status-pill" class="pill sample">SAMPLE</span>
+        <span id="channel" class="meta-item">no channel</span>
+        <span id="provider" class="meta-item"></span>
+        <a class="meta-item link" href="/overlay" target="_blank" rel="noreferrer">overlay ↗</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="card ask">
+        <div class="card-head">
+          <h2>Ask the room</h2>
+          <span class="card-note" id="window-note">rolling 120s</span>
+        </div>
+
+        <div class="ask-row">
+          <input id="question" type="text" maxlength="240" placeholder="Chat, what do you actually think?" autocomplete="off" />
+          <button id="ask" class="primary">Ask chat</button>
+          <button id="dissent" class="ghost" title="Force the two-voice argument even if the window is lopsided">Dissent</button>
+        </div>
+
+        <div id="thinking" class="thinking hidden"><span class="spinner"></span> reading the room…</div>
+
+        <article id="answer" class="answer hidden">
+          <div class="answer-head">
+            <span id="answer-mode" class="mode">CONSENSUS</span>
+            <span id="answer-confidence" class="confidence">—</span>
+            <span id="answer-meta" class="answer-meta"></span>
+          </div>
+          <p id="answer-stance" class="stance"></p>
+          <div id="answer-voices" class="voices hidden">
+            <div class="voice" data-voice="a">
+              <div class="voice-label" id="voice-a-label"></div>
+              <p class="voice-stance" id="voice-a-stance"></p>
+              <div class="voice-receipts" id="voice-a-receipts"></div>
+            </div>
+            <div class="voice" data-voice="b">
+              <div class="voice-label" id="voice-b-label"></div>
+              <p class="voice-stance" id="voice-b-stance"></p>
+              <div class="voice-receipts" id="voice-b-receipts"></div>
+            </div>
+          </div>
+          <div id="answer-receipts" class="receipts"></div>
+          <div id="answer-basis" class="basis"></div>
+        </article>
+
+        <div id="empty" class="empty">
+          Nothing asked yet. The face stays a cloud until you ask.
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card room">
+          <div class="card-head"><h2>The room</h2><span class="card-note" id="room-status">sample</span></div>
+          <div class="stat-grid">
+            <div class="stat"><span class="stat-num" id="stat-chatters">0</span><span class="stat-label">chatters</span></div>
+            <div class="stat"><span class="stat-num" id="stat-messages">0</span><span class="stat-label">messages</span></div>
+            <div class="stat"><span class="stat-num" id="stat-window">120</span><span class="stat-label">seconds</span></div>
+          </div>
+          <div class="scoreboard">
+            <div class="score-side"><span class="score-label">CHAT</span><span class="score-value chat" id="score-chat">0</span></div>
+            <div class="score-side"><span class="score-label">YOU</span><span class="score-value" id="score-streamer">0</span></div>
+          </div>
+          <div class="score-actions">
+            <button id="score-chat-button" class="tiny">Chat wins</button>
+            <button id="score-streamer-button" class="tiny">Streamer wins</button>
+          </div>
+        </section>
+
+        <section class="card trust">
+          <div class="card-head"><h2>Held back</h2><span class="card-note">never quoted</span></div>
+          <ul id="trust-list" class="trust-list"><li class="muted">nothing filtered yet</li></ul>
+          <p class="fineprint">
+            Deleted messages, links, PII, commands, bots and blocked terms are removed before clustering.
+            The model only ever sees message ids from this window.
+          </p>
+        </section>
+
+        <section class="card lore">
+          <div class="card-head"><h2>Channel lore</h2><span class="card-note">remembered</span></div>
+          <ul id="lore-list" class="lore-list"><li class="muted">no lore yet</li></ul>
+          <div class="lore-add">
+            <input id="lore-input" type="text" maxlength="280" placeholder="e.g. chat still calls the 20-choke run" />
+            <button id="lore-add" class="tiny">Pin</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

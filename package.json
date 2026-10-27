@@ -1,0 +1,28 @@
+{
+  "name": "acclamation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Your chat has a word. Now it has a voice.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server/main.js",
+    "replay": "node --disable-warning=ExperimentalWarning replay/replay.js",
+    "replay:consensus": "node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/consensus.jsonl",
+    "replay:dissent": "node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/dissent.jsonl",
+    "replay:messy": "node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/messy.jsonl",
+    "auth": "node --disable-warning=ExperimentalWarning scripts/auth.js",
+    "doctor": "node --disable-warning=ExperimentalWarning scripts/doctor.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "keywords": [
+    "twitch",
+    "eventsub",
+    "chat",
+    "overlay",
+    "hackathon"
+  ],
+  "license": "MIT"
+}

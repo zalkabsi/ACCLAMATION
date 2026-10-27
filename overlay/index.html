@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Acclamation — overlay</title>
+    <link rel="stylesheet" href="/overlay/style.css" />
+  </head>
+  <body>
+    <canvas id="stage" aria-hidden="true"></canvas>
+
+    <div id="hud" class="idle">
+      <header>
+        <div class="brand"><i class="dot"></i> ACCLAMATION</div>
+        <div class="room">
+          <span id="room-status">LISTENING</span>
+          <span class="sep">/</span>
+          <span id="room-count">0 in the room</span>
+        </div>
+      </header>
+
+      <div id="raid" class="raid" hidden>
+        <div class="raid-kicker">INCOMING</div>
+        <div class="raid-text" id="raid-text"></div>
+      </div>
+
+      <section id="answer" hidden>
+        <div class="question" id="question"></div>
+        <div class="stance" id="stance"></div>
+        <div class="dissent" id="dissent" hidden>
+          <article class="voice" data-voice="a">
+            <div class="voice-head"><span class="voice-mark"></span><span id="voice-label-a"></span></div>
+            <p class="voice-stance" id="voice-stance-a"></p>
+            <div class="voice-receipts" id="voice-receipts-a"></div>
+          </article>
+          <article class="voice" data-voice="b">
+            <div class="voice-head"><span class="voice-mark"></span><span id="voice-label-b"></span></div>
+            <p class="voice-stance" id="voice-stance-b"></p>
+            <div class="voice-receipts" id="voice-receipts-b"></div>
+          </article>
+        </div>
+        <div class="receipts" id="receipts"></div>
+        <div class="measure">
+          <span class="chip" id="confidence"></span>
+          <span class="sample" id="sample"></span>
+        </div>
+      </section>
+
+      <footer>
+        <div class="score" aria-label="streamer versus chat">
+          <span class="score-label">STREAMER <em>vs</em> CHAT</span>
+          <span class="score-num" id="score-streamer">0</span>
+          <span class="score-dash">—</span>
+          <span class="score-num chat" id="score-chat">0</span>
+        </div>
+        <div class="hint" id="hint">waiting for the streamer</div>
+      </footer>
+    </div>
+
+    <script type="module" src="/overlay/face.js"></script>
+  </body>
+</html>

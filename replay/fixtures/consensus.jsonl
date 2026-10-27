@@ -1,0 +1,23 @@
+// Consensus: chat has one loud read — the run dies at 20.
+// Includes a moderator deletion, a link, a command and bot noise that must
+// never appear in the receipts.
+{"t":0,"type":"chat","id":"c01","user":"mochirose","text":"you're gonna choke at 20"}
+{"t":140,"type":"chat","id":"c02","user":"kayluv","text":"choke at 20 for sure"}
+{"t":280,"type":"chat","id":"c03","user":"pixelpete","text":"he always chokes at 20"}
+{"t":420,"type":"chat","id":"c04","user":"sadgirl","text":"20 is where the run dies"}
+{"t":560,"type":"chat","id":"c05","user":"ggmike","text":"20 will cook him"}
+{"t":700,"type":"chat","id":"c06","user":"lurker99","text":"already choking at 20 sadge"}
+{"t":820,"type":"chat","id":"c07","user":"anon","text":"ez choke at 20"}
+{"t":940,"type":"chat","id":"c08","user":"beans","text":"choke at 20 i'm calling it"}
+{"t":1060,"type":"chat","id":"c09","user":"toast","text":"20 is his wall, chalked"}
+{"t":1180,"type":"chat","id":"c10","user":"doodle","text":"choking at 20 like always"}
+{"t":1300,"type":"chat","id":"c11","user":"mochirose","text":"you're gonna choke at 20"}
+{"t":1420,"type":"chat","id":"c12","user":"mochirose","text":"you're gonna choke at 20"}
+{"t":1500,"type":"chat","id":"c13","user":"sketchy","text":"free bits at badlink.example.com"}
+{"t":1580,"type":"chat","id":"c14","user":"viewer","text":"!drop"}
+{"t":1660,"type":"chat","id":"c15","user":"nightbot","text":"Timer set for 20 minutes"}
+{"t":1740,"type":"chat","id":"c16","user":"shyone","text":"his hands are shaking, he knows"}
+{"t":1900,"type":"delete","id":"c16"}
+{"t":2200,"type":"chat","id":"c17","user":"kayluv","text":"20. always 20."}
+{"t":2600,"type":"raid","user":"mochirose","viewers":37}
+{"t":2800,"type":"subscribe","user":"sadgirl","tier":"1000"}
