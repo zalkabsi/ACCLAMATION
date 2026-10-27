@@ -104,6 +104,41 @@ locally, and a validator rejects invented IDs, URLs and mode changes. Remove the
 model and you still have a measurement tool; remove the measurement and the
 voices are fiction. Both are required.
 
+### How streamers and their community use it
+
+**The streamer** installs one OBS browser source and keeps one dashboard tab
+open. During a stream they hit **Ask chat** — or a Stream Deck key wired to
+`POST /api/trigger` — when a moment is worth interrogating: a boss attempt, a
+prediction, a questionable play, the aftermath of a raid. The glyphs stop
+drifting and form a face; the answer lands in one voice with a measured
+confidence and a row of receipts. The streamer can push back — "do you actually
+all think that?" — and hit **Dissent**, and the face breaks into two voices that
+argue on stream. Raids and subs pop a banner and the face reacts without any
+setup. Between streams the same dashboard holds the channel lore and the
+**Streamer vs Chat** record: pin "chat still calls the 20-choke run", settle who
+was right with the two score buttons, and the next stream still remembers it.
+
+**The community** does nothing new. No commands, no extension, no sign-up and no
+bot messages: viewers just chat, and their messages *are* the character. Every
+message in the rolling 120-second window becomes a glyph in the face, and the
+receipts on screen carry real usernames and real quotes, so being quoted is
+recognisable. When the room is split, both halves get their own voice and colour
+— the argument is the content instead of a poll result. When there are too few
+chatters, Acclamation says "that is not a crowd yet" rather than inventing a
+consensus; when a moderator deletes a message or times someone out, it vanishes
+from the face and can never be quoted. Links, personal information and bot noise
+never reach the screen at all.
+
+**Why the loop works on Twitch.** It gives the streamer a rival that is their own
+audience — three repeatable beats: ask, argue, remember. It gives viewers
+representation with their name attached. It gives moderators controls that take
+effect immediately, and it never posts into chat, so it changes nothing about
+how the channel is run.
+
+**First five minutes on a real channel:** add the browser source, ask one
+question mid-game, read the receipts out loud, force dissent when chat disagrees,
+then pin one line and settle the score after the game.
+
 ### How we used Codex
 
 1. **Contract first.** The first artifact in the thread was `AGENTS.md` — scopes,
