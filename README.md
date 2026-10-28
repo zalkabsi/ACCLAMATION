@@ -220,7 +220,7 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 | Overlay renders consensus and dissent faces at 1920×1080 | ✅ existing screenshots (`docs/overlay-consensus.png`, `docs/overlay-dissent.png`); 1280×720 recheck pending |
 | Grounding rejects invented ids and URLs; falls back to the local voice | ✅ `test/contract.test.js`, `test/session.test.js` |
 | Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
-| Live Twitch leg (real token, real channel, real message) | ⏳ **not verified** — OAuth authorization and a real message are still needed. `npm run doctor` is the gate and exits 0 only after a real message arrives. |
+| Live Twitch leg (real token, real channel, real message) | ⏳ **not verified** — a token was validated and subscriptions were created, but no real chat message arrived during the doctor run. `npm run doctor` is the gate. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
 | TTS on stage | ⏳ browser playback and `?mute=1` still need a runtime check on the machine that will stream |
 
