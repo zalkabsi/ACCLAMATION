@@ -15,7 +15,8 @@ the runs below succeeded with that permission.
 | Overlay at 1920×1080 | [Consensus screenshot](overlay-consensus.png), [dissent screenshot](overlay-dissent.png) | Both existing PNGs are 1920×1080. Manual inspection shows complete faces and separated receipts. | Manual, existing images |
 | Overlay at 1280×720 | Render the overlay at 1280×720 | Not independently verified in this session; the two checked-in PNGs are 1920×1080. | Manual, pending |
 | Browser voice and `?mute=1` | Exercise both in a browser or OBS | Browser access was unavailable. The source contains the browser speech path and mute guard, but playback and mute behavior have not been runtime-verified. | Manual, pending |
-| Live Twitch leg | `npm run auth`, then `npm run doctor` with chat active | **Not verified.** Credentials are needed; the doctor is the gate and exits successfully only after a real chat message arrives. | Manual, pending |
+| Twitch settings, presence only | Check `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and `TWITCH_CHANNEL` | All three are nonempty; values were not displayed or validated. | Local |
+| Live Twitch leg | `npm run auth`, then `npm run doctor` with chat active | **Not verified.** The required Twitch settings are present, but OAuth authorization and a real chat message remain to be verified; the doctor is the gate. | Manual, pending |
 
 ## Captured baseline output
 

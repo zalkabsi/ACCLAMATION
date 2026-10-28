@@ -14,9 +14,9 @@ submission artifact.
 > rewrite history; put the missing evidence in a new doc instead.
 >
 > Do not change runtime behavior. Do not touch `.env`, `.tokens.json` or
-> `.data/`. Do not claim the live Twitch leg is verified — it is not (no
-> credentials yet). Do not rewrite git history. Do not change the honesty note
-> at the end of `docs/SUBMISSION.md`.
+> `.data/`. Do not claim the live Twitch leg is verified — it is not (no real
+> chat message has arrived). Do not rewrite git history. Do not change the
+> honesty note at the end of `docs/SUBMISSION.md`.
 >
 > **Task 1 — baseline (do not skip).** Run and capture the real output:
 > - `npm test` → expect 83 passing, 0 failing. If it differs, stop and report.
