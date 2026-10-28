@@ -25,10 +25,10 @@ submission artifact.
 > - `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/messy.jsonl --speed 100000` → INSUFFICIENT, 3 chatters, 12 blocked.
 >
 > **Task 2 — documentation sync (factual edits only).**
-> a. `README.md` — replace the three `74 tests` occurrences (quickstart, verified table, repo map) with 83. Update the OAuth scopes line (~110) to `user:read:chat channel:read:subscriptions channel:moderate` and say the last two are optional. Add rows to the "What is verified" table for embedding clustering (`test/cluster.test.js`, `test/embeddings.test.js`) and ban/unban (`test/helix.test.js`, `test/window.test.js`). Add a "never quote a timed-out or banned user" row to the safety table. In the model section, document `ACCLAMATION_EMBEDDINGS=openai` + `EMBEDDINGS_MODEL` as opt-in semantic clustering with lexical fallback.
-> b. `AGENTS.md` — two `74 tests` → 83; make sure the embeddings env vars are documented somewhere under configuration.
-> c. `docs/DEMO.md` — two `74` → 83.
-> d. `docs/SUBMISSION.md` — four `74` → 83. Add `channel.ban` / `channel.unban` to the subscription lists (~51, ~83, ~180) and `channel:moderate` to the scopes (~53, ~170). Remove the now-done embeddings and `channel.ban` items from "What's next" (~270), keeping per-voice TTS staging, Stream Deck and cross-stream lore.
+> a. `README.md` — update the test counts (quickstart, verified table, repo map) to 83. Update the OAuth scopes line (~110) to `user:read:chat channel:read:subscriptions channel:moderate` and say the last two are optional. Add rows to the "What is verified" table for embedding clustering (`test/cluster.test.js`, `test/embeddings.test.js`) and ban/unban (`test/helix.test.js`, `test/window.test.js`). Add a "never quote a timed-out or banned user" row to the safety table. In the model section, document `ACCLAMATION_EMBEDDINGS=openai` + `EMBEDDINGS_MODEL` as opt-in semantic clustering with lexical fallback.
+> b. `AGENTS.md` — update both test counts to 83; make sure the embeddings env vars are documented somewhere under configuration.
+> c. `docs/DEMO.md` — update both test counts to 83.
+> d. `docs/SUBMISSION.md` — update all four test counts to 83. Add `channel.ban` / `channel.unban` to the subscription lists (~51, ~83, ~180) and `channel:moderate` to the scopes (~53, ~170). Remove the now-done embeddings and `channel.ban` items from "What's next" (~270), keeping per-voice TTS staging, Stream Deck and cross-stream lore.
 > e. `.env.example` — add, after the model block:
 >    ```
 >    # Optional semantic clustering (needs a key; falls back to lexical)
@@ -44,13 +44,13 @@ submission artifact.
 > - consensus replay · 87% confidence · local
 > - dissent replay · 43/29 split · local
 > - messy replay · refused, 3 chatters / 12 blocked · local
-> - overlay · verified at 1920×1080 and 1280×720 · manual, screenshots `docs/overlay-consensus.png`, `docs/overlay-dissent.png`
+> - overlay · inspect `docs/overlay-consensus.png` and `docs/overlay-dissent.png`; both are 1920×1080, and the 1280×720 check needs separate evidence
 > - live Twitch leg · **not verified** · needs credentials; `npm run doctor` is the gate and exits 0 only after a real chat message
 >
 > **Finish:** run `npm test` again, commit in logical chunks with conventional
 > messages, and `git push`. If tests or the push fail, stop and report the exact
 > output.
 >
-> **Acceptance:** `npm test` 83 passing; no `74 tests` string left in docs;
+> **Acceptance:** `npm test` 83 passing; no stale test counts left in docs;
 > `docs/VERIFICATION.md` clearly marks the live leg as unproven; CI green after
 > the push.

@@ -60,7 +60,7 @@ Requires **Node 22.19+**. There are no dependencies to install (the runtime is
 Node's built-in WebSocket, HTTP and SQLite).
 
 ```bash
-npm test                                  # 74 tests, no network
+npm test                                  # 83 tests, no network
 npm run replay                            # consensus fixture through the whole pipeline
 npm run replay -- --fixture replay/fixtures/dissent.jsonl
 npm run replay -- --fixture replay/fixtures/messy.jsonl
@@ -92,6 +92,12 @@ Any OpenAI-compatible `/chat/completions` endpoint works. Without a key the
 **local voice** composes the answer from the measured clusters — useful for
 building, and a real fallback if the model times out during the demo.
 
+Semantic clustering is opt-in: set `ACCLAMATION_EMBEDDINGS=openai` and
+`LLM_API_KEY` to cluster with embeddings. `EMBEDDINGS_MODEL` defaults to
+`text-embedding-3-small`; the existing `LLM_BASE_URL` selects the endpoint.
+Without a key, or if the embedding request fails, clustering falls back to the
+local lexical method. The network-free tests use deterministic fake embeddings.
+
 ## Live setup
 
 1. **Create the Twitch app** at <https://dev.twitch.tv/console/apps>.
@@ -107,8 +113,9 @@ building, and a real fallback if the model times out during the demo.
    ```bash
    npm run auth
    ```
-   Requests `user:read:chat channel:read:subscriptions`; writes `.tokens.json`
-   with mode 600. The token must belong to the channel being read.
+   Requests `user:read:chat channel:read:subscriptions channel:moderate`;
+   the last two scopes are optional. Writes `.tokens.json` with mode 600. The
+   token must belong to the channel being read.
 4. **Prove the live leg before building anything else.**
    ```bash
    npm run doctor
@@ -148,9 +155,9 @@ confidence  = 50 + (share·100 − 50) · reliability
 ```
 
 Nine chatters where 100% agree reports ~84%, not 100%, because nine people is
-not the internet. A 43/29 split reports a split, not a confidence. Under
-`MIN_CHATTERS` (default 4) it refuses to speak at all: *"Only 3 people have said
-anything. That is not a crowd yet."*
+not the internet. A 43/29 split reports both shares and a measured confidence.
+Under `MIN_CHATTERS` (default 4) it refuses to speak at all: *"Only 3 people
+have said anything. That is not a crowd yet."*
 
 The model is not allowed to return a confidence field; the contract rejects it.
 That number is computed from the window and attached by the session.
@@ -160,6 +167,7 @@ That number is computed from the window and attached by the session.
 | Rule | Mechanism | Test |
 | --- | --- | --- |
 | Never quote a deleted message | `channel.chat.message_delete` scrubs immediately; deleted ids cannot be re-added | `test/window.test.js`, `test/session.test.js`, `test/replay.test.js` |
+| Never quote a timed-out or banned user's scrubbed messages | With `channel:moderate`, a ban/timeout event removes the user's messages and blocks new ones; an unban permits fresh messages | `test/window.test.js`, `test/session.test.js` |
 | Never quote links or PII | intake scrubber drops links, emails, phone numbers | `test/scrub.test.js` |
 | Never quote commands, bots, blocked terms, floods | intake scrubber + per-user cap + dedupe | `test/scrub.test.js`, `test/window.test.js` |
 | Never invent a quote or username | receipts are ids; the contract resolves them to real messages | `test/contract.test.js`, `test/session.test.js` |
@@ -168,6 +176,8 @@ That number is computed from the window and attached by the session.
 
 Metrics for all of this are exposed in the dashboard's **Held back** panel and
 in `answer.basis.filtered` — the receipts for the receipts.
+An answer already in flight can still use the snapshot taken before a deletion
+or ban; the next trigger uses the scrubbed window. See [safety notes](docs/SAFETY.md).
 
 ## Architecture
 
@@ -178,6 +188,7 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
  channel.chat.message     scrub      measure      ids only        │
  channel.chat.message_delete  │        │                          ▼
  channel.raid / subscribe     │        │                   strict JSON contract
+ channel.ban / unban          │        │                          │
                               │        │                    + grounding check
                               ▼        ▼                          │
                         SSE /api/events ──► overlay: glyphs,        │
@@ -199,21 +210,25 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 
 | Claim | Status |
 | --- | --- |
-| 74 tests, no network, no API key | ✅ `npm test` |
+| 83 tests, no network, no API key | ✅ `npm test` |
 | Runs on Node 22.19 (minimum) through Node 25 | ✅ full suite executed on 22.19 and 25; CI matrix covers 22.19 + 24 |
 | Real EventSub client against a real WebSocket implementation (fake server) | ✅ `test/eventsub.test.js` |
 | Reconnect + keepalive-watchdog paths | ✅ tested at sub-second keepalives |
 | Full pipeline through replay fixtures, including delete-scrubbing | ✅ `test/replay.test.js` |
-| Overlay renders consensus and dissent faces | ✅ captured in headless Chrome (`docs/*.png`) |
+| Embedding clustering and lexical fallback | ✅ deterministic fake embeddings in `test/cluster.test.js`, `test/embeddings.test.js`; no live provider required |
+| Ban/unban subscription shapes and window scrubbing | ✅ `test/helix.test.js`, `test/window.test.js`, `test/session.test.js` |
+| Overlay renders consensus and dissent faces at 1920×1080 | ✅ existing screenshots (`docs/overlay-consensus.png`, `docs/overlay-dissent.png`); 1280×720 recheck pending |
 | Grounding rejects invented ids and URLs; falls back to the local voice | ✅ `test/contract.test.js`, `test/session.test.js` |
 | Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
 | Live Twitch leg (real token, real channel, real message) | ⏳ **not run in this environment** — credentials were not available. `npm run doctor` is the gate and exits 0 only after a real message arrives. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
-| TTS on stage | ⏳ browser voice works headless-tested only for wiring; judge on the machine that will stream |
+| TTS on stage | ⏳ browser playback and `?mute=1` still need a runtime check on the machine that will stream |
 
 This is deliberate: the repo does not claim a live run it has not done. The
 doctor command exists so the first hour of day one ends with real chat arriving
 over the socket, exactly as the plan said.
+See [verification evidence](docs/VERIFICATION.md) for the recorded checks and
+remaining manual checks.
 
 ## Repo map
 
@@ -230,7 +245,7 @@ web/                      control-room dashboard
 replay/                   fake EventSub server + JSONL fixtures
 scripts/                  OAuth and the live doctor
 docs/                     demo script, safety notes, submission copy, screenshots
-test/                     74 tests
+test/                     83 tests
 ```
 
 ## Demo

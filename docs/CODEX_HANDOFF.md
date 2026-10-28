@@ -12,7 +12,7 @@ work, so the thread is genuinely part of the build.
 > Read `AGENTS.md` before doing anything. This repo is **Acclamation**, a Twitch
 > tool: it collapses live chat into one character using EventSub, measures the
 > room's stance by clustering, and answers through an OBS overlay in one voice
-> (or two, in split mode). It has zero runtime dependencies and 74 network-free
+> (or two, in split mode). It has zero runtime dependencies and 83 network-free
 > tests.
 >
 > Current state: `npm test` is green; `npm run replay` works offline; the repo is
@@ -29,7 +29,7 @@ work, so the thread is genuinely part of the build.
 
 1. **Baseline.** Run `npm test` and `node --disable-warning=ExperimentalWarning
    replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000`.
-   Confirm 74 tests and the dissent answer.
+   Confirm 83 passing tests and the dissent answer.
 2. **Live leg.** If `.env` has `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and
    `TWITCH_CHANNEL`, run `npm run auth` (browser consent), then
    `npm run doctor --wait=90` while someone types in chat. Fix anything the
@@ -38,27 +38,23 @@ work, so the thread is genuinely part of the build.
 3. **Record the proof.** On success, update the README "What is verified" table:
    change the live row from ⏳ to ✅ with the date and channel login. Add the
    doctor output (redact token values) to `docs/DEMO.md` under pre-flight.
-4. **Embedding clustering (stretch, only if the live leg is done).** Implement
-   `clusterMessages(messages, { embed })` in `src/chat/cluster.js`: cosine
-   clustering over embeddings when a provider is configured, lexical fallback
-   otherwise, same output shape. Add tests with a deterministic fake embedder
-   proving the fallback still passes and that two paraphrases with no shared
-   tokens cluster together. Wire an embedding provider in `src/llm/` behind
-   `ACCLAMATION_EMBEDDINGS=openai` (no key ⇒ lexical).
-5. **`channel.ban` scrubbing.** Add the subscription (`channel.ban`, scope
-   `channel:moderate`; both ban and unban use `broadcaster_user_id` per Twitch
-   docs), route both events into
-   `session.ingest`, call `window.banUser()` / a new `unban` path, and add tests
-   proving a banned user's messages disappear from the next answer's receipts.
-   Update `scripts/doctor.js` to report the new subscription.
+4. **Done — embedding clustering** (`eddcdc1`). `clusterMessages` uses cosine
+   similarity with an opt-in embedding provider and
+   falls back to lexical clustering. Deterministic tests cover paraphrases and
+   fallback; `ACCLAMATION_EMBEDDINGS=openai` enables the provider with a key.
+5. **Done — ban/unban scrubbing** (`155f1cf`). Both subscriptions use
+   `broadcaster_user_id` and optional `channel:moderate`; notifications route
+   through `session.ingest`, and tests cover scrubbing and unban. The doctor
+   reports the subscription results.
 6. **Demo polish.** At 1280×720 and 1920×1080, confirm the overlay renders a full
    face (the mask shuffle fix) and receipts don't overlap. If `TTS_PROVIDER=openai`
    is configured, verify `/api/tts` streams; otherwise confirm the browser voice
-   path and `?mute=1`.
+   path and `?mute=1`. The checked-in overlay screenshots are 1920×1080; the
+   1280×720 and browser audio checks still need independent verification.
 
 ## Definition of done
 
-- `npm test` green (more than 74 tests), `npm run replay` still works.
+- `npm test` green (83 tests), `npm run replay` still works.
 - Doctor prints a real chat message; README status table reflects it honestly.
 - One commit per task, conventional messages.
 - `/status` in this thread copied into the submission.

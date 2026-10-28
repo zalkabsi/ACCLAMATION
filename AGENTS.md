@@ -41,7 +41,7 @@ This file is the contract for anyone (human or Codex) changing the code.
 
 | Command | What it does |
 | --- | --- |
-| `npm test` | 74 tests, no network, ~1.5s |
+| `npm test` | 83 tests, no network, ~1.5s |
 | `npm start` | dashboard on `http://127.0.0.1:8787`, overlay on `/overlay` |
 | `npm run replay` | offline fixture through the real EventSub client + full pipeline |
 | `npm run replay -- --fixture replay/fixtures/dissent.jsonl` | split-mode demo |
@@ -60,6 +60,11 @@ Fixture format is JSONL; one event per line:
 ```
 
 `t` is milliseconds, `speed` divides it (default 20x).
+
+Clustering is lexical by default. Set `ACCLAMATION_EMBEDDINGS=openai` and
+`LLM_API_KEY` to opt in to semantic clustering; `EMBEDDINGS_MODEL` defaults to
+`text-embedding-3-small`. The provider uses `LLM_BASE_URL` and falls back to
+lexical clustering if the key is missing or the embedding request fails.
 
 ---
 
@@ -112,6 +117,7 @@ configuration on purpose; authorize the channel you stream on.
 | `src/llm/prompt.js` | compact prompt payload + sample message ids |
 | `src/llm/contract.js` | strict JSON contract + grounding validation |
 | `src/llm/provider.js` | OpenAI-compatible chat completions (timeout, retry) |
+| `src/llm/embeddings.js` | optional OpenAI-compatible embeddings and in-memory cache |
 | `src/llm/local.js` | deterministic voice used offline or on model failure |
 | `src/core/session.js` | orchestration: ingest → cluster → ask → validate → emit → remember |
 | `src/eventsub/client.js` | EventSub WebSocket protocol, reconnect, watchdog, dedupe |
@@ -124,7 +130,7 @@ configuration on purpose; authorize the channel you stream on.
 | `overlay/` | canvas glyph swarm, face mask, dissent fracture, SSE |
 | `web/` | control room dashboard |
 | `scripts/auth.js`, `scripts/doctor.js` | OAuth and the day-one gate |
-| `test/` | 74 tests, network-free |
+| `test/` | 83 tests, network-free |
 
 Request flow:
 
@@ -147,7 +153,7 @@ EventSub ──► ChatWindow (scrub/delete/dedupe) ──► snapshot
 | Step | Budget | Where enforced |
 | --- | --- | --- |
 | Key press → glyphs start converging | < 200 ms | `trigger:start` is emitted before clustering; overlay reacts immediately |
-| Window snapshot + clustering (1–800 messages) | < 40 ms | synchronous, measured locally |
+| Window snapshot + lexical clustering (1–800 messages) | < 40 ms | synchronous, measured locally; opt-in embeddings add a network request |
 | Model JSON answer | p50 ≈ 1.2 s, p95 < 3 s | `LLM_TIMEOUT_MS` (default 6000) + one repair attempt |
 | Fallback to local voice if the model fails | < 5 ms | `composeLocalAnswer` |
 | TTS start | browser voice immediate; server TTS ≈ 1 s | overlay `/api/tts` |
@@ -178,8 +184,8 @@ EventSub state machine. Those are the five things judges poke.
 
 ## Known limits (say them out loud, don't hide them)
 
-- Clustering is lexical. Unusual phrasing over-splits, which lowers confidence
-  honestly; `clusterMessages()` is the seam for an embeddings implementation.
+- Lexical clustering is the default. Unusual phrasing can over-split and lower
+  confidence; opt-in embeddings can group paraphrases when a provider is set.
 - `channel.ban` and `channel.unban` scrub and release users when the token has
   `channel:moderate`; otherwise Helix reports those optional subscriptions as
   skipped.
@@ -195,12 +201,9 @@ EventSub state machine. Those are the five things judges poke.
 
 ## Where to take it next (in priority order)
 
-1. **Embedding clustering** (`clusterMessages({ embed })`): cosine over
-   `text-embedding-3-small`, fall back to lexical when no key. Same output
-   shape, better real-world shares.
-2. **Sub-minute memory**: store per-stream highlights and let the model reference
+1. **Sub-minute memory**: store per-stream highlights and let the model reference
    last stream's calls ("chat called the 20-choke run last week").
-3. **Stream Deck plugin**: a 60-line HTTP action hitting `POST /api/trigger`;
+2. **Stream Deck plugin**: a 60-line HTTP action hitting `POST /api/trigger`;
    the dashboard button is the fallback.
-4. **Split voice staging**: currently two voices are concatenated; give each
+3. **Split voice staging**: currently two voices are concatenated; give each
    voice its own pitch/speed and a 200ms interleave in the browser TTS.
