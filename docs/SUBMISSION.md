@@ -69,7 +69,7 @@ list, invariants, latency budget). Codex wrote the EventSub client against the
 fake server first, then the scrubber/window/clustering/contract stack with tests,
 then the overlay and dashboard. The tests were the review mechanism: every
 invariant in `AGENTS.md` has a test, and the fake server means the suite runs
-offline in about 1.5 seconds. **Codex session ID:** `<paste from /status>`.
+offline in about 1.5 seconds. **Codex session ID:** `01a181e5-4d0e-7793-a5de-07af087f8982`.
 
 ## Devpost long answers
 
