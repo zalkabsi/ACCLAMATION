@@ -128,6 +128,43 @@ test('clustering is deterministic and capped', () => {
   assert.ok(capped.clusters.length <= 5);
 });
 
+test('embedding vectors cluster paraphrases that share no lexical tokens', async () => {
+  const input = messages([
+    ['one', 'A sedan accelerated rapidly'],
+    ['two', 'A car sped quickly'],
+  ]);
+  assert.equal(tokenize(input[0].text).some((token) => tokenize(input[1].text).includes(token)), false);
+
+  const embed = async (texts) => {
+    assert.deepEqual(texts, input.map((message) => message.text));
+    return [
+      [1, 0, 0],
+      [0.99, 0.01, 0],
+    ];
+  };
+  const result = await clusterMessages(input, { embed });
+  const wordClusters = result.clusters.filter((cluster) => cluster.kind === 'words');
+  assert.equal(wordClusters.length, 1);
+  assert.equal(wordClusters[0].userCount, 2);
+  assert.deepEqual(wordClusters[0].messages.map((message) => message.id), ['m0', 'm1']);
+});
+
+test('failed embeddings fall back to the unchanged deterministic lexical result', async () => {
+  const input = messages(dissentLines);
+  const lexical = clusterMessages(input);
+  let errors = 0;
+  const embedded = await clusterMessages(input, {
+    embed: async () => {
+      throw new Error('provider unavailable');
+    },
+    onEmbedError: () => {
+      errors += 1;
+    },
+  });
+  assert.deepEqual(embedded, lexical);
+  assert.equal(errors, 1);
+});
+
 test('representatives are distinct users and carry real message ids', () => {
   const { clusters } = clusterMessages(messages(consensusLines));
   const cluster = clusters.find((c) => c.kind === 'words');

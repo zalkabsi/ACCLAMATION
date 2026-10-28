@@ -29,6 +29,7 @@ export class ChannelSession extends EventEmitter {
     logger,
     now = () => Date.now(),
     completeFn = complete,
+    embed,
   }) {
     super();
     this.config = config;
@@ -37,6 +38,7 @@ export class ChannelSession extends EventEmitter {
     this.logger = logger;
     this.now = now;
     this.completeFn = completeFn;
+    this.embed = embed;
     this._pending = false;
     this.recent = [];
     this._lastMeasurement = null;
@@ -112,8 +114,17 @@ export class ChannelSession extends EventEmitter {
     return { accepted: true };
   }
 
-  _measure(snapshot) {
-    const { clusters, totalChatters } = clusterMessages(snapshot.messages);
+  async _measure(snapshot) {
+    const clusterOptions = this.embed
+      ? {
+          embed: this.embed,
+          onEmbedError: (error) =>
+            this.logger?.warn('embedding clustering failed; using lexical clustering', {
+              error: error.message,
+            }),
+        }
+      : {};
+    const { clusters, totalChatters } = await clusterMessages(snapshot.messages, clusterOptions);
     const measurement = measureConsensus(clusters, {
       minChatters: this.config.channel.minChatters,
       totalChatters,
@@ -133,7 +144,14 @@ export class ChannelSession extends EventEmitter {
 
     try {
       const snapshot = this.window.snapshot();
-      const { clusters, measurement } = this._measure(snapshot);
+      this.emit('trigger:start', {
+        question: text,
+        mode: 'measuring',
+        chatters: snapshot.stats.chatters,
+        at: askedAt,
+      });
+
+      const { clusters, measurement } = await this._measure(snapshot);
       if (forceMode === 'dissent' && measurement.mode === 'consensus' && clusters.length >= 2) {
         // The streamer can force the argument even on a lopsided window; the
         // shares still come from the measurements, never from the override.
@@ -144,13 +162,6 @@ export class ChannelSession extends EventEmitter {
         };
       }
       this._lastMeasurement = measurement;
-
-      this.emit('trigger:start', {
-        question: text,
-        mode: measurement.mode,
-        chatters: measurement.totalChatters,
-        at: askedAt,
-      });
 
       const allowed = allowedMessageIds(clusters);
 

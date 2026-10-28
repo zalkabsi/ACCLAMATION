@@ -144,6 +144,17 @@ export function loadConfig({ env = process.env, cwd = process.cwd(), tokenFile }
 
   const resolvedProvider = provider === 'openai' && !llmApiKey ? 'local' : provider;
 
+  const requestedEmbeddings = (env.ACCLAMATION_EMBEDDINGS || 'none').toLowerCase();
+  if (!['none', 'openai'].includes(requestedEmbeddings)) {
+    throw new ConfigError(
+      `ACCLAMATION_EMBEDDINGS must be none or openai (got ${requestedEmbeddings})`,
+    );
+  }
+  const embeddingProvider = requestedEmbeddings === 'openai' && llmApiKey ? 'openai' : 'none';
+  if (requestedEmbeddings === 'openai' && !llmApiKey) {
+    warnings.push('ACCLAMATION_EMBEDDINGS=openai but LLM_API_KEY is empty — using lexical clustering');
+  }
+
   return {
     cwd,
     provider: resolvedProvider,
@@ -168,6 +179,13 @@ export function loadConfig({ env = process.env, cwd = process.cwd(), tokenFile }
       model: env.LLM_MODEL || 'gpt-4o-mini',
       timeoutMs: num(env, 'LLM_TIMEOUT_MS', 6000, { min: 500, max: 60000 }),
       temperature: num(env, 'LLM_TEMPERATURE', 0.6, { min: 0, max: 2 }),
+    },
+    embeddings: {
+      provider: embeddingProvider,
+      baseUrl: (env.LLM_BASE_URL || 'https://api.openai.com/v1').replace(/\/+$/, ''),
+      apiKey: llmApiKey,
+      model: env.EMBEDDINGS_MODEL || 'text-embedding-3-small',
+      timeoutMs: num(env, 'EMBEDDINGS_TIMEOUT_MS', 3500, { min: 300, max: 15000 }),
     },
     tts: {
       provider: (env.TTS_PROVIDER || 'client').toLowerCase(),
@@ -197,6 +215,7 @@ export function publicConfig(config) {
     allowLinks: config.safety.allowLinks,
     blockedTerms: config.safety.blockedTerms,
     tts: config.tts.provider,
+    embeddings: config.embeddings?.provider || 'none',
     model: config.provider === 'local' ? 'local' : config.llm.model,
     warnings: config.warnings,
   };

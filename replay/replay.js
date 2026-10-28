@@ -17,6 +17,7 @@ import { openMemory } from '../src/memory/store.js';
 import { EventSubClient } from '../src/eventsub/client.js';
 import { FakeEventSubServer } from './fake-eventsub.js';
 import { createLogger } from '../src/log.js';
+import { createOpenAIEmbedder } from '../src/llm/embeddings.js';
 import { createApp } from '../src/server/http.js';
 
 export function parseArgs(argv = process.argv.slice(2)) {
@@ -122,6 +123,9 @@ export async function runReplay({
       scrubber: new Scrubber(config.safety),
     }),
     logger,
+    embed: config.embeddings?.provider === 'openai'
+      ? createOpenAIEmbedder(config.embeddings)
+      : undefined,
   });
 
   const server = await new FakeEventSubServer({ keepaliveTimeoutSeconds: 10, logger }).listen();

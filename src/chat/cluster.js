@@ -87,6 +87,39 @@ function cosine(a, b) {
   return dot / Math.sqrt(normA * normB);
 }
 
+function cosineVector(a, b) {
+  if (!a?.length || !b?.length || a.length !== b.length) return 0;
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
+  }
+  if (!normA || !normB) return 0;
+  return dot / Math.sqrt(normA * normB);
+}
+
+function mergeVectors(a, b, countA, countB) {
+  if (!a) return b;
+  if (!b) return a;
+  const total = countA + countB;
+  return a.map((value, index) => (value * countA + b[index] * countB) / total);
+}
+
+function validEmbeddings(vectors, expectedCount) {
+  if (!Array.isArray(vectors) || vectors.length !== expectedCount || expectedCount === 0) return false;
+  const dimension = vectors[0]?.length;
+  if (!Number.isInteger(dimension) || dimension < 1) return false;
+  return vectors.every(
+    (vector) =>
+      Array.isArray(vector) &&
+      vector.length === dimension &&
+      vector.every((value) => Number.isFinite(value)),
+  );
+}
+
 function topFeatures(centroid, limit = 40) {
   return new Map([...centroid.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit));
 }
@@ -157,22 +190,70 @@ function buildCluster(units) {
   };
 }
 
-/**
+/** Cluster messages by embeddings when supplied, otherwise use lexical features.
+ * The embed callback receives the usable message texts in input order and may
+ * return their vectors directly or as a promise. Failed/invalid embeddings
+ * fall back to the deterministic lexical implementation.
+ *
  * @param {Array<{id:string,userId:string,login:string,text:string,ts:number,index?:number}>} messages
- * @param {{threshold?:number, mergeThreshold?:number, maxClusters?:number}} options
+ * @param {{threshold?:number, mergeThreshold?:number, maxClusters?:number, embed?:(texts:string[])=>number[][]|Promise<number[][]>, onEmbedError?:(error:Error)=>void}} options
  */
 export function clusterMessages(messages, options = {}) {
-  const threshold = options.threshold ?? 0.4;
-  const mergeThreshold = options.mergeThreshold ?? 0.62;
+  if (typeof options.embed !== 'function') return clusterPrepared(messages, options);
+
+  const usableTexts = messages
+    .filter((message) => extractFeatures(message.text).size > 0)
+    .map((message) => message.text);
+  if (usableTexts.length === 0) return clusterPrepared(messages, options);
+
+  const fallback = (error) => {
+    if (error) options.onEmbedError?.(error);
+    return clusterPrepared(messages, options);
+  };
+  try {
+    const result = options.embed(usableTexts);
+    if (result && typeof result.then === 'function') {
+      return result.then((vectors) =>
+        validEmbeddings(vectors, usableTexts.length)
+          ? clusterPrepared(messages, options, vectors)
+          : fallback(new Error('embedding provider returned invalid vectors')),
+      ).catch(fallback);
+    }
+    return validEmbeddings(result, usableTexts.length)
+      ? clusterPrepared(messages, options, result)
+      : fallback(new Error('embedding provider returned invalid vectors'));
+  } catch (error) {
+    return fallback(error);
+  }
+}
+
+function clusterPrepared(messages, options, embeddings = null) {
+  const threshold = options.threshold ?? (embeddings ? 0.78 : 0.4);
+  const mergeThreshold = options.mergeThreshold ?? (embeddings ? 0.88 : 0.62);
   const maxClusters = options.maxClusters ?? 8;
 
   const usable = [];
   const reactions = [];
+  let embeddingIndex = 0;
   for (const message of messages) {
     const features = extractFeatures(message.text);
     if (features.size === 0) reactions.push(message);
-    else usable.push({ message, features, negated: hasNegation(message.text) });
+    else {
+      usable.push({
+        message,
+        features,
+        negated: hasNegation(message.text),
+        vector: embeddings?.[embeddingIndex] ?? null,
+      });
+      embeddingIndex += 1;
+    }
   }
+
+  const similarityBetween = (a, b) => {
+    let similarity = embeddings ? cosineVector(a.vector, b.vector) : cosine(a.features, b.features);
+    if (a.negated !== b.negated) similarity *= 0.55;
+    return similarity;
+  };
 
   // Each cluster keeps a handful of prototypes. Comparing against any of them
   // (rather than a growing centroid) stops similarity from being diluted as a
@@ -187,8 +268,7 @@ export function clusterMessages(messages, options = {}) {
     for (const cluster of clusters) {
       let similarity = 0;
       for (const prototype of cluster.prototypes) {
-        let s = cosine(unit.features, prototype.features);
-        if (unit.negated !== prototype.negated) s *= 0.55;
+        const s = similarityBetween(unit, prototype);
         if (s > similarity) similarity = s;
       }
       if (similarity > bestSimilarity) {
@@ -197,11 +277,18 @@ export function clusterMessages(messages, options = {}) {
       }
     }
     if (best && bestSimilarity >= threshold) {
+      const previousCount = best.units.length;
       best.units.push(unit);
       if (best.prototypes.length < 8) best.prototypes.push(unit);
       best.centroid = mergeCentroid(best.centroid, unit.features);
+      if (embeddings) best.vectorCentroid = mergeVectors(best.vectorCentroid, unit.vector, previousCount, 1);
     } else {
-      clusters.push({ units: [unit], prototypes: [unit], centroid: topFeatures(unit.features, 60) });
+      clusters.push({
+        units: [unit],
+        prototypes: [unit],
+        centroid: topFeatures(unit.features, 60),
+        vectorCentroid: unit.vector,
+      });
     }
   }
 
@@ -211,7 +298,9 @@ export function clusterMessages(messages, options = {}) {
     let bestSimilarity = 0;
     for (let i = 0; i < clusters.length; i += 1) {
       for (let j = i + 1; j < clusters.length; j += 1) {
-        const similarity = cosine(clusters[i].centroid, clusters[j].centroid);
+        const similarity = embeddings
+          ? cosineVector(clusters[i].vectorCentroid, clusters[j].vectorCentroid)
+          : cosine(clusters[i].centroid, clusters[j].centroid);
         if (similarity > bestSimilarity) {
           bestSimilarity = similarity;
           bestPair = [i, j];
@@ -220,9 +309,14 @@ export function clusterMessages(messages, options = {}) {
     }
     if (!bestPair || bestSimilarity < mergeThreshold) break;
     const [i, j] = bestPair;
+    const countI = clusters[i].units.length;
+    const countJ = clusters[j].units.length;
     clusters[i].units.push(...clusters[j].units);
     clusters[i].prototypes.push(...clusters[j].prototypes.slice(0, 8 - clusters[i].prototypes.length));
     clusters[i].centroid = mergeCentroid(clusters[i].centroid, clusters[j].centroid);
+    if (embeddings) {
+      clusters[i].vectorCentroid = mergeVectors(clusters[i].vectorCentroid, clusters[j].vectorCentroid, countI, countJ);
+    }
     clusters.splice(j, 1);
   }
 
@@ -234,14 +328,25 @@ export function clusterMessages(messages, options = {}) {
     let target = clusters[1];
     let bestSimilarity = -1;
     for (const candidate of clusters.slice(1)) {
-      const similarity = cosine(smallest.centroid, candidate.centroid);
+      const similarity = embeddings
+        ? cosineVector(smallest.vectorCentroid, candidate.vectorCentroid)
+        : cosine(smallest.centroid, candidate.centroid);
       if (similarity > bestSimilarity) {
         bestSimilarity = similarity;
         target = candidate;
       }
     }
+    const targetCount = target.units.length;
     target.units.push(...smallest.units);
     target.centroid = mergeCentroid(target.centroid, smallest.centroid);
+    if (embeddings) {
+      target.vectorCentroid = mergeVectors(
+        target.vectorCentroid,
+        smallest.vectorCentroid,
+        targetCount,
+        smallest.units.length,
+      );
+    }
     clusters = clusters.filter((c) => c !== smallest);
   }
 

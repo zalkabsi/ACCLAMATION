@@ -38,7 +38,7 @@ const consensusChatters = [
   ['toast', '20 is his wall'],
 ];
 
-function makeSession({ provider = 'local', completeFn, lines = consensusChatters, configOverrides = {}, memory } = {}) {
+function makeSession({ provider = 'local', completeFn, embed, lines = consensusChatters, configOverrides = {}, memory } = {}) {
   const window = new ChatWindow({
     seconds: 120,
     perUserCap: 6,
@@ -51,6 +51,7 @@ function makeSession({ provider = 'local', completeFn, lines = consensusChatters
     window,
     logger,
     completeFn,
+    embed,
   });
   lines.forEach(([login, text, id], index) => {
     session.ingest('channel.chat.message', chat(login, text, id || `m${index}`));
@@ -68,6 +69,27 @@ test('the local voice answers from the measured window and records the call', as
   assert.ok(answer.receipts.every((receipt) => receipt.message_id.startsWith('m')));
   assert.equal(answer.chatters, 10);
   assert.equal(memory.recentCalls(1)[0].mode, 'consensus');
+});
+
+test('the overlay starts forming before asynchronous embedding clustering finishes', async () => {
+  let releaseEmbeddings;
+  const { session } = makeSession({
+    embed: (texts) =>
+      new Promise((resolve) => {
+        releaseEmbeddings = () => resolve(texts.map(() => [1, 0]));
+      }),
+  });
+  let started = null;
+  session.once('trigger:start', (event) => {
+    started = event;
+  });
+
+  const pending = session.ask();
+  assert.equal(started?.mode, 'measuring');
+  assert.equal(started?.chatters, consensusChatters.length);
+  releaseEmbeddings();
+  const answer = await pending;
+  assert.equal(answer.mode, 'consensus');
 });
 
 test('a valid model answer is used and its receipts are resolved from the window', async () => {

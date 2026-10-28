@@ -34,6 +34,24 @@ test('provider defaults to local without a key and openai with one', () => {
   assert.equal(explicit.provider, 'local');
 });
 
+test('embedding clustering is opt-in and requires the OpenAI key', () => {
+  const lexical = loadConfig({
+    env: { ACCLAMATION_EMBEDDINGS: 'openai' },
+    cwd: '/tmp/acclamation-config-test',
+  });
+  assert.equal(lexical.embeddings.provider, 'none');
+  assert.ok(lexical.warnings.some((warning) => warning.includes('using lexical clustering')));
+
+  const openai = loadConfig({
+    env: { ACCLAMATION_EMBEDDINGS: 'openai', LLM_API_KEY: 'sk-test' },
+    cwd: '/tmp/acclamation-config-test',
+  });
+  assert.equal(openai.embeddings.provider, 'openai');
+  assert.equal(openai.embeddings.model, 'text-embedding-3-small');
+  assert.equal(publicConfig(openai).embeddings, 'openai');
+  assert.equal(JSON.stringify(publicConfig(openai)).includes('sk-test'), false);
+});
+
 test('invalid numbers and providers fail loudly', () => {
   assert.throws(() => loadConfig({ env: { WINDOW_SECONDS: 'soon' }, cwd: '/tmp/x' }), ConfigError);
   assert.throws(() => loadConfig({ env: { WINDOW_SECONDS: '5' }, cwd: '/tmp/x' }), ConfigError);

@@ -7,6 +7,7 @@ import { EventSubClient } from '../eventsub/client.js';
 import { HelixClient, subscribeAll } from '../eventsub/helix.js';
 import { ensureFreshToken } from '../auth/flow.js';
 import { createLogger } from '../log.js';
+import { createOpenAIEmbedder } from '../llm/embeddings.js';
 import { createApp } from './http.js';
 
 /**
@@ -24,7 +25,10 @@ export async function startApp({ config, logger: providedLogger } = {}) {
     perUserCap: config.channel.perUserCap,
     scrubber,
   });
-  const session = new ChannelSession({ config, memory, window: chatWindow, logger });
+  const embed = config.embeddings?.provider === 'openai'
+    ? createOpenAIEmbedder(config.embeddings)
+    : undefined;
+  const session = new ChannelSession({ config, memory, window: chatWindow, logger, embed });
 
   const connection = {
     status: 'sample',
