@@ -86,10 +86,14 @@ Fixture format is JSONL; one event per line:
 | `channel.chat.message_delete` | `broadcaster_user_id`, `user_id` | `user:read:chat` |
 | `channel.raid` | `to_broadcaster_user_id` | none |
 | `channel.subscribe` | `broadcaster_user_id` | `channel:read:subscriptions` (optional) |
+| `channel.ban` | `broadcaster_user_id` | `channel:moderate` (optional) |
+| `channel.unban` | `broadcaster_user_id` | `channel:moderate` (optional) |
 
-OAuth scopes requested by `npm run auth`: `user:read:chat
-channel:read:subscriptions`. Redirect URI must exactly match the Twitch app
-registration, default `http://localhost:8917/callback`.
+OAuth scopes requested by `npm run auth`: `user:read:chat`,
+`channel:read:subscriptions` and `channel:moderate`. The latter two are
+optional; without them, subscribe hype or ban/unban scrubbing is skipped.
+Redirect URI must exactly match the Twitch app registration, default
+`http://localhost:8917/callback`.
 
 If the token belongs to a different user than `TWITCH_CHANNEL`, chat reads
 require `user:bot` + `channel:bot` and moderator status. Doctor refuses that
@@ -176,9 +180,9 @@ EventSub state machine. Those are the five things judges poke.
 
 - Clustering is lexical. Unusual phrasing over-splits, which lowers confidence
   honestly; `clusterMessages()` is the seam for an embeddings implementation.
-- Bans/timeouts are handled when a message is already in the window
-  (`session.window.banUser`) but `channel.ban` is not subscribed yet — it needs
-  `moderator:read:banned_users` and another Helix condition.
+- `channel.ban` and `channel.unban` scrub and release users when the token has
+  `channel:moderate`; otherwise Helix reports those optional subscriptions as
+  skipped.
 - Server-side token refresh happens at startup only; a very long stream should
   restart or rely on the browser voice. A refresh timer is a one-liner where
   `ensureFreshToken` is already called.
@@ -196,9 +200,7 @@ EventSub state machine. Those are the five things judges poke.
    shape, better real-world shares.
 2. **Sub-minute memory**: store per-stream highlights and let the model reference
    last stream's calls ("chat called the 20-choke run last week").
-3. **`channel.ban` subscription** so a timeout scrubs the window in the same
-   second, not on the next delete event.
-4. **Stream Deck plugin**: a 60-line HTTP action hitting `POST /api/trigger`;
+3. **Stream Deck plugin**: a 60-line HTTP action hitting `POST /api/trigger`;
    the dashboard button is the fallback.
-5. **Split voice staging**: currently two voices are concatenated; give each
+4. **Split voice staging**: currently two voices are concatenated; give each
    voice its own pitch/speed and a 200ms interleave in the browser TTS.

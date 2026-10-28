@@ -51,6 +51,10 @@ export class ChannelSession extends EventEmitter {
         return this._onChat(event, metadata);
       case 'channel.chat.message_delete':
         return this._onDelete(event);
+      case 'channel.ban':
+        return this._onBan(event);
+      case 'channel.unban':
+        return this._onUnban(event);
       case 'channel.raid':
         return this._onRaid(event);
       case 'channel.subscribe':
@@ -89,6 +93,22 @@ export class ChannelSession extends EventEmitter {
     const removed = this.window.delete(event.message_id);
     this.emit('delete', { messageId: event.message_id, user: event.target_user_login, removed });
     return { removed };
+  }
+
+  _onBan(event) {
+    const userId = event.user_id || event.user_login || event.user_name;
+    const removed = userId ? this.window.banUser(userId) : 0;
+    const user = event.user_name || event.user_login || userId || 'unknown user';
+    this.emit('ban', { user, removed, at: this.now() });
+    return { removed };
+  }
+
+  _onUnban(event) {
+    const userId = event.user_id || event.user_login || event.user_name;
+    const unbanned = userId ? this.window.unbanUser(userId) : false;
+    const user = event.user_name || event.user_login || userId || 'unknown user';
+    this.emit('unban', { user, unbanned, at: this.now() });
+    return { unbanned };
   }
 
   _onRaid(event) {

@@ -52,6 +52,17 @@ test('banning a user scrubs their existing messages and future ones', () => {
   assert.equal(win.add(message({ id: 'c', text: 'after the ban' })).reason, 'banned_user');
 });
 
+test('unbanning permits new messages but never restores scrubbed message ids', () => {
+  const win = makeWindow();
+  win.add(message({ id: 'a' }));
+  assert.equal(win.banUser('u1'), 1);
+  assert.equal(win.unbanUser('u1'), true);
+  assert.equal(win.unbanUser('u1'), false);
+  assert.equal(win.add(message({ id: 'a' })).reason, 'duplicate_id');
+  assert.equal(win.add(message({ id: 'b', text: 'after the unban' })).added, true);
+  assert.deepEqual(win.snapshot().messages.map((entry) => entry.id), ['b']);
+});
+
 test('duplicate messages and per-user floods are rejected', () => {
   const win = makeWindow();
   assert.equal(win.add(message()).added, true);

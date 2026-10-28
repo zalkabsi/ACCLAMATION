@@ -93,7 +93,7 @@ const server = createServer(async (req, res) => {
       console.log(`  Re-run npm run auth and approve everything: ${ALL_SCOPES.join(' ')}`);
     }
     if (optionalMissing.length) {
-      console.log(`  Note: missing optional scopes: ${optionalMissing.join(', ')} (sub hype moments disabled)`);
+      console.log(`  Note: missing optional scopes: ${optionalMissing.join(', ')} (related optional EventSub subscriptions disabled)`);
     }
     console.log('');
     console.log('  Next:');

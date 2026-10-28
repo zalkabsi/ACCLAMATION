@@ -111,6 +111,18 @@ export function chatSubscriptions({ broadcasterUserId, userId }) {
     condition: { broadcaster_user_id: broadcasterUserId },
     scope: 'channel:read:subscriptions',
   });
+  subscriptions.push(
+    {
+      type: 'channel.ban',
+      condition: { broadcaster_user_id: broadcasterUserId },
+      scope: 'channel:moderate',
+    },
+    {
+      type: 'channel.unban',
+      condition: { broadcaster_user_id: broadcasterUserId },
+      scope: 'channel:moderate',
+    },
+  );
   return subscriptions;
 }
 

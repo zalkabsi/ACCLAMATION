@@ -180,6 +180,11 @@ export class ChatWindow {
     return removed;
   }
 
+  /** A Twitch unban permits new messages; previously scrubbed ids stay deleted. */
+  unbanUser(userIdOrLogin) {
+    return this._banned.delete(String(userIdOrLogin).toLowerCase());
+  }
+
   clear() {
     this._messages.clear();
     this._order = [];

@@ -35,7 +35,11 @@ test('chat subscriptions carry the conditions Twitch actually requires', () => {
   });
   assert.deepEqual(byType['channel.raid'].condition, { to_broadcaster_user_id: '111' });
   assert.deepEqual(byType['channel.subscribe'].condition, { broadcaster_user_id: '111' });
+  assert.deepEqual(byType['channel.ban'].condition, { broadcaster_user_id: '111' });
+  assert.deepEqual(byType['channel.unban'].condition, { broadcaster_user_id: '111' });
   assert.equal(byType['channel.raid'].scope, null);
+  assert.equal(byType['channel.ban'].scope, 'channel:moderate');
+  assert.equal(byType['channel.unban'].scope, 'channel:moderate');
 });
 
 test('subscription requests are bound to the websocket session id', async () => {
@@ -123,7 +127,39 @@ test('subscribeAll skips the optional types when scopes are missing', async () =
   });
   assert.deepEqual(created, ['channel.chat.message', 'channel.chat.message_delete', 'channel.raid']);
   assert.equal(results.find((result) => result.type === 'channel.subscribe').status, 'skipped');
+  assert.equal(results.find((result) => result.type === 'channel.ban').status, 'skipped');
+  assert.equal(results.find((result) => result.type === 'channel.unban').status, 'skipped');
+  assert.equal(results.find((result) => result.type === 'channel.ban').reason, 'missing scope channel:moderate');
   assert.ok(results.filter((result) => result.status === 'created').length === 3);
+});
+
+test('subscribeAll creates ban and unban subscriptions with the documented scope', async () => {
+  const created = [];
+  const helix = {
+    async createSubscription(request) {
+      created.push(request);
+      return { alreadyExists: false, data: { id: `id-${request.type}` } };
+    },
+  };
+  const results = await subscribeAll({
+    helix,
+    sessionId: 'session-abc',
+    broadcasterUserId: '111',
+    userId: '111',
+    scopes: ['user:read:chat', 'channel:moderate'],
+    logger,
+  });
+  assert.deepEqual(
+    created.filter((request) => ['channel.ban', 'channel.unban'].includes(request.type)),
+    [
+      { type: 'channel.ban', condition: { broadcaster_user_id: '111' }, sessionId: 'session-abc' },
+      { type: 'channel.unban', condition: { broadcaster_user_id: '111' }, sessionId: 'session-abc' },
+    ],
+  );
+  assert.deepEqual(
+    results.filter((result) => ['channel.ban', 'channel.unban'].includes(result.type)).map((result) => result.status),
+    ['created', 'created'],
+  );
 });
 
 test('subscribeAll reports failures without aborting the rest', async () => {

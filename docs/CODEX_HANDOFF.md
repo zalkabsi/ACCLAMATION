@@ -46,8 +46,8 @@ work, so the thread is genuinely part of the build.
    tokens cluster together. Wire an embedding provider in `src/llm/` behind
    `ACCLAMATION_EMBEDDINGS=openai` (no key ⇒ lexical).
 5. **`channel.ban` scrubbing.** Add the subscription (`channel.ban`, scope
-   `moderator:read:banned_users` — verify the condition fields in Twitch docs
-   before coding), route `channel.ban` and `channel.unban` events into
+   `channel:moderate`; both ban and unban use `broadcaster_user_id` per Twitch
+   docs), route both events into
    `session.ingest`, call `window.banUser()` / a new `unban` path, and add tests
    proving a banned user's messages disappear from the next answer's receipts.
    Update `scripts/doctor.js` to report the new subscription.

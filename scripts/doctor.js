@@ -7,7 +7,7 @@
 import { pathToFileURL } from 'node:url';
 import { EventSubClient } from '../src/eventsub/client.js';
 import { HelixClient, subscribeAll } from '../src/eventsub/helix.js';
-import { REQUIRED_SCOPES, loadConfig, loadDotenv, loadTokenFile } from '../src/config.js';
+import { OPTIONAL_SCOPES, REQUIRED_SCOPES, loadConfig, loadDotenv, loadTokenFile } from '../src/config.js';
 import { ensureFreshToken, saveTokenFile } from '../src/auth/flow.js';
 import { createLogger } from '../src/log.js';
 
@@ -80,6 +80,10 @@ export async function runDoctor({ waitSeconds = Number(argv.get('wait') || 45) }
     return 1;
   }
   line('+ Required scope present: user:read:chat');
+  const optionalMissing = OPTIONAL_SCOPES.filter((scope) => !validation.scopes.includes(scope));
+  if (optionalMissing.length) {
+    line(`  Optional scopes missing; related subscriptions will be skipped: ${optionalMissing.join(', ')}`);
+  }
 
   const channel = (config.twitch.channel || validation.login).toLowerCase();
   if (!config.twitch.channel) {
@@ -144,7 +148,11 @@ export async function runDoctor({ waitSeconds = Number(argv.get('wait') || 45) }
         });
         for (const subscription of created) {
           const mark = ['created', 'existing'].includes(subscription.status) ? '+' : 'x';
-          const detail = subscription.error ? ` (${subscription.error})` : '';
+          const detail = subscription.error
+            ? ` (${subscription.error})`
+            : subscription.reason
+              ? ` (${subscription.reason})`
+              : '';
           line(`${mark} ${subscription.type}: ${subscription.status}${detail}`);
           subscriptions.push(subscription);
         }

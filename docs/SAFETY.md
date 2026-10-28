@@ -44,10 +44,10 @@ event is delivered twice. The model's prompt is built from the window *after*
 scrubbing, so a deleted message cannot appear in a prompt, a cluster, a
 representative or a receipt.
 
-`ChatWindow.banUser()` removes every message from a user and rejects their
-future messages; it is exposed for a `channel.ban` subscription (not wired yet —
-see AGENTS.md). Helix delete of the subscription on shutdown keeps Twitch's
-subscription list clean.
+`channel.ban` removes every message from a user and rejects their future
+messages. `channel.unban` permits new messages but never restores the scrubbed
+ids. Both subscriptions need the optional `channel:moderate` scope. Helix delete
+of the subscription on shutdown keeps Twitch's subscription list clean.
 
 ## 3. Grounding: the model picks ids, the server writes quotes
 
@@ -134,9 +134,9 @@ speaking for it would be the exact failure this product is supposed to avoid.
 - **No automated moderation of slurs or harassment.** Blocked terms are a
   channel setting (`BLOCKED_TERMS`), not a model judgement. For a public demo,
   set the channel's chat filters and pre-block known-bad terms.
-- **No `channel.ban` subscription.** A timeout only scrubs messages when a ban
-  event is delivered; today the streamer can call the session's `banUser`, but
-  the overlay path is delete-driven.
+- **Ban scrubbing needs `channel:moderate`.** If that optional scope is missing,
+  Helix skips `channel.ban` and `channel.unban`; the doctor reports the missing
+  scope and skipped subscriptions.
 - **No age-gating or PII redaction of chat display** beyond intake filtering;
   screenshots for the submission use seeded chat, not real viewers.
 - **Model hosting.** If `LLM_BASE_URL` points at a third party, chat samples

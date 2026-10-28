@@ -80,6 +80,10 @@ test('a token file is read without exposing the token in public config', () => {
   assert.equal(config.liveEnabled, true);
   assert.equal(config.twitch.userId, '123');
   assert.deepEqual(config.twitch.scopes, ['user:read:chat']);
+  assert.deepEqual(publicConfig(config).missingOptionalScopes, [
+    'channel:read:subscriptions',
+    'channel:moderate',
+  ]);
 
   const published = publicConfig(config);
   assert.equal(JSON.stringify(published).includes('secret-token'), false);

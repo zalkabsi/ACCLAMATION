@@ -183,6 +183,31 @@ test('a deleted message can never appear in an answer', async () => {
   assert.ok(answer.basis.filtered.deleted >= 1);
 });
 
+test('a channel ban removes that chatter from the next answer receipts', async () => {
+  const { session, window } = makeSession();
+  const result = session.ingest('channel.ban', {
+    user_id: 'id-mochirose',
+    user_login: 'mochirose',
+    user_name: 'mochirose',
+  });
+  assert.equal(result.removed, 1);
+  assert.equal(window.get('m0'), null);
+
+  const answer = await session.ask();
+  assert.equal(answer.chatters, consensusChatters.length - 1);
+  assert.equal(answer.receipts.some((receipt) => receipt.message_id === 'm0'), false);
+});
+
+test('a channel unban allows fresh messages without restoring scrubbed receipts', () => {
+  const { session, window } = makeSession();
+  session.ingest('channel.ban', { user_id: 'id-mochirose', user_login: 'mochirose' });
+  const result = session.ingest('channel.unban', { user_id: 'id-mochirose', user_login: 'mochirose' });
+  assert.deepEqual(result, { unbanned: true });
+  assert.equal(session.ingest('channel.chat.message', chat('mochirose', 'new take after unban', 'm-new')).added, true);
+  assert.equal(window.get('m0'), null);
+  assert.equal(window.get('m-new').text, 'new take after unban');
+});
+
 test('split chat produces two voices, and forcing dissent on one stance does not invent a split', async () => {
   const split = [
     ['mochirose', 'he is washed, easy choke'],

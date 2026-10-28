@@ -5,11 +5,12 @@ import path from 'node:path';
  * Scopes Chorus needs.
  * `user:read:chat` is required for channel.chat.message and
  * channel.chat.message_delete. `channel:read:subscriptions` unlocks
- * channel.subscribe hype moments and is optional.
+ * channel.subscribe hype moments and `channel:moderate` unlocks channel ban
+ * and unban notifications; both are optional.
  * channel.raid requires no authorization.
  */
 export const REQUIRED_SCOPES = ['user:read:chat'];
-export const OPTIONAL_SCOPES = ['channel:read:subscriptions'];
+export const OPTIONAL_SCOPES = ['channel:read:subscriptions', 'channel:moderate'];
 export const ALL_SCOPES = [...REQUIRED_SCOPES, ...OPTIONAL_SCOPES];
 
 export const DEFAULT_BOTS = [
@@ -210,6 +211,7 @@ export function publicConfig(config) {
     userId: config.twitch.userId || null,
     scopes: config.twitch.scopes,
     missingScopes: REQUIRED_SCOPES.filter((s) => !config.twitch.scopes.includes(s)),
+    missingOptionalScopes: OPTIONAL_SCOPES.filter((s) => !config.twitch.scopes.includes(s)),
     windowSeconds: config.channel.windowSeconds,
     minChatters: config.channel.minChatters,
     allowLinks: config.safety.allowLinks,
