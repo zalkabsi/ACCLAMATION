@@ -1,0 +1,9 @@
+#!/bin/sh
+# Run Codex from this project even when the global npm install is broken.
+# Prefers the CLI bundled with the ChatGPT app, then falls back to PATH.
+set -e
+BUNDLED="/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex"
+if [ -x "$BUNDLED" ]; then
+  exec "$BUNDLED" "$@"
+fi
+exec codex "$@"
