@@ -64,12 +64,13 @@ clustered share of unique chatters — the model is forbidden from returning one
 
 ## How we used Codex
 
-One thread held most of the build, guided by `AGENTS.md` (protocol facts, scope
-list, invariants, latency budget). Codex wrote the EventSub client against the
-fake server first, then the scrubber/window/clustering/contract stack with tests,
-then the overlay and dashboard. The tests were the review mechanism: every
-invariant in `AGENTS.md` has a test, and the fake server means the suite runs
-offline in about 1.5 seconds. **Codex session ID:** `01a181e5-4d0e-7793-a5de-07af087f8982`.
+In a documented follow-up thread, Codex worked from `AGENTS.md` to add opt-in
+embedding clustering and ban/unban scrubbing, then helped verify the project.
+The suite has 83 network-free tests, and a real Twitch chat event reached the
+doctor. The original project was already present when that follow-up began.
+
+**Follow-up session ID:** `01a181e5-4d0e-7793-a5de-07af087f8982`.
+**Main build session ID:** `<confirm from the original build thread>`.
 
 ## Devpost long answers
 
@@ -83,21 +84,20 @@ rather than decorative.
 through Twitch OAuth, open an EventSub WebSocket session, and consume
 `channel.chat.message`, `channel.chat.message_delete`, `channel.raid`,
 `channel.subscribe`, `channel.ban` and `channel.unban` live. On 2026-10-29,
-`npm run doctor` received a real chat event; a live overlay and audio run still
-needs to be verified.
+`npm run doctor` received a real chat event. A separate live app test ingested a
+real message and emitted an insufficient-chat answer on the overlay event
+stream; browser display and audio still need to be verified.
 The offline replay feeds fixtures through a fake EventSub server. It ships as
 an OBS browser-source overlay, which means no Extension review and no chatbot
 review; the streamer installs a URL and talks to their chat.
 
-**Codex is the build method.** The repository is structured to be built by a
-Codex thread. `AGENTS.md` is the thread contract: OAuth scopes, EventSub
-subscription versions and conditions, the five non-negotiable safety invariants,
-the latency budget, and the file map. Before any UI existed, Codex built a fake
-EventSub WebSocket server (RFC 6455 handshake, welcome/keepalive/reconnect/
-revocation) so the entire product could be developed and tested without Twitch
-credentials. Every invariant in `AGENTS.md` has a test; the suite was a review
-gate throughout the build and now has 83 tests with no network or API key. The
-submitted Codex session ID is the thread where that happened.
+**Codex is the build method.** `AGENTS.md` records the contract: OAuth scopes,
+EventSub subscription versions and conditions, safety invariants, the latency
+budget, and the file map. In the documented follow-up thread, Codex added
+semantic clustering and ban/unban scrubbing with tests. The repository also has
+a fake EventSub WebSocket server for offline development, and the suite has 83
+tests with no network or API key. Confirm the original build thread and its ID
+before making claims about that part of the work.
 
 **AI is the product, not a feature.** The model writes the crowd's voice and,
 in split mode, both arguing voices. It is deliberately not trusted with facts:
@@ -144,25 +144,19 @@ then pin one line and settle the score after the game.
 
 ### How we used Codex
 
-1. **Contract first.** The first artifact in the thread was `AGENTS.md` — scopes,
-   EventSub message flow, reconnect rules, safety invariants, latency budget.
-   Codex worked from that file, not from a prompt in a chat window.
-2. **Network boundary second.** Codex wrote the fake EventSub server and the
-   production WebSocket client together, so the reconnect/keepalive state
-   machine could be tested in milliseconds and no work waited on credentials.
-3. **Pipeline third, test-first.** The scrubber, rolling window, clustering and
-   confidence were built with tests for deleted messages, links, PII, bots,
-   floods, split detection and refusal. The strict JSON contract and its
-   grounding validator came next, with a repair-then-fallback path.
-4. **Visible surface last.** The canvas glyph-face overlay and the dashboard were
-   built against the replay harness (`npm run replay -- --serve`). The repository
-   contains 1080p screenshots; a 720p recheck is still needed.
-5. **Verification loop.** `npm test` and the replay fixtures became the review
-   mechanism. The suite now has 83 tests, and CI runs it on Node 22.19 and 24.
+1. **Contract.** The follow-up began with `AGENTS.md`, which records the EventSub
+   rules, safety invariants, latency budget and repository map.
+2. **Clustering.** Codex added opt-in embedding clustering with a lexical fallback
+   and deterministic tests (`eddcdc1`).
+3. **Moderation.** Codex added ban/unban subscription handling and tests for
+   scrubbing affected users from the window (`155f1cf`).
+4. **Verification.** The follow-up recorded the replay fixtures, the 83-test
+   suite and CI on Node 22.19 and 24. The doctor received a real Twitch chat
+   event, and a separate app test emitted an answer on the overlay event stream;
+   browser display and audio still need a manual check.
 
-The thread also produced the live-leg operator tooling: `npm run auth` (OAuth)
-and `npm run doctor`, which refuses to report success until a real chat message
-arrives over a real EventSub socket.
+The original project predated the documented follow-up. Confirm the original
+build thread and its session ID before describing work from that thread.
 
 ### How Acclamation connects to Twitch
 
@@ -193,7 +187,7 @@ arrives over a real EventSub socket.
 
 | Product | What it does in Acclamation |
 | --- | --- |
-| **OpenAI Codex** | The build agent: one thread, `AGENTS.md` as the contract, test-first iteration, protocol work, overlay and dashboard. Session ID submitted with the project. |
+| **OpenAI Codex** | Follow-up development and verification guided by `AGENTS.md`; the original build session ID still needs confirmation. |
 | **OpenAI API — Chat Completions** | Turns measured clusters and sample message IDs into the single stance, or the two voices in split mode. Strict JSON only; default model `gpt-4o-mini`, any OpenAI-compatible endpoint configurable. |
 | **OpenAI Text-to-Speech** (optional) | Streams the answer voice to the overlay through a local `/api/tts` proxy when `TTS_PROVIDER=openai`. The default is the browser's speech synthesis, so the demo needs no second key. |
 | **Twitch EventSub** | Real-time chat, message deletion, raids and subscriptions — the live data that becomes glyphs, stances and receipts. |
