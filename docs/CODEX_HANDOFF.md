@@ -17,8 +17,9 @@ work, so the thread is genuinely part of the build.
 >
 > Current state: `npm test` is green; `npm run replay` works offline; the repo is
 > pushed and CI runs on Node 22.19 + 24. On 2026-10-29 the doctor received a real
-> Twitch chat event. The live overlay and sustained connection still need a
-> runtime check. Credentials may be present in `.env` (never commit it).
+> Twitch chat event. A separate live app test emitted an answer on the overlay
+> event stream. Browser display and audio remain unchecked; reconnect status
+> needs investigation. Credentials may be present in `.env` (never commit it).
 >
 > Work through the tasks below in order. Keep every test green, add tests for new
 > behavior, and commit per task. Do not add runtime dependencies. Do not weaken
@@ -34,7 +35,8 @@ work, so the thread is genuinely part of the build.
 2. **Live doctor — real chat received; reconnect issue pending.** On 2026-10-29,
    the doctor received a real chat event and exited 0. An earlier attempt missed
    a keepalive and the doctor did not recreate its subscriptions after
-   reconnecting; sustained operation needs a separate check.
+   reconnecting. In a separate main-server test, subscriptions were recreated
+   after a forced pause but the reported status remained `reconnecting`.
 3. **Done — record the proof.** The README, `docs/DEMO.md` and
    `docs/VERIFICATION.md` record the successful doctor run. Account identifiers,
    credentials and chat text are omitted.

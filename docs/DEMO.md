@@ -15,7 +15,10 @@ npm start                        # dashboard + overlay up
 
 On 2026-10-29, `npm run doctor -- --wait=300` received a real Twitch chat
 event and exited 0. One earlier attempt missed a keepalive, after which the
-doctor did not recreate its subscriptions on reconnect. Run the pre-flight
+doctor did not recreate its subscriptions on reconnect. In a separate test,
+the live app ingested a real chat event and emitted an insufficient-chat answer
+on the overlay event stream. After a forced pause, the app recreated its Twitch
+subscriptions but still displayed a `reconnecting` status. Run the pre-flight
 again before recording; the live overlay and browser audio still need their own
 runtime check. See [verification evidence](VERIFICATION.md).
 

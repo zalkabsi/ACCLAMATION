@@ -18,12 +18,21 @@ denied those binds, and the runs below succeeded with that permission.
 | Twitch settings, presence only | Check `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and `TWITCH_CHANNEL` | All three are nonempty; values were not displayed or validated. | Local |
 | Live Twitch intake, 2026-10-28 | `npm run auth`, then `npm run doctor -- --wait=90` | Partial: a token was saved and validated, and all six subscriptions were created, but no chat message arrived; doctor exited 1. The auth command also exited 1 after an exchange error despite saving the token. | Live, partial |
 | Live Twitch intake, 2026-10-29 | `npm run doctor -- --wait=300`, through a redacting wrapper with debug logging | A real chat event arrived and the doctor exited 0. All six subscriptions were created. This proves receipt by the doctor, not a live overlay or sustained operation. | Live, Node v25.2.1 |
+| Live app and event stream, 2026-10-29 | `src/server/main.js`, localhost, in-memory storage and local voice; redacted monitor | A real chat message was accepted; triggering with one chatter returned `insufficient` and emitted `chat`, `trigger:start` and `answer` on the event stream. A real browser display and audio were not observed. | Live, Node v25.2.1 |
+| Main-server reconnect, 2026-10-29 | Seven-minute live monitor with a 25-second controlled process pause | After the pause, Twitch reported all six new subscriptions enabled and fresh keepalives arrived. The server's reported status nevertheless remained `reconnecting`; a post-reconnect chat message was not observed. | Live, controlled test |
 
 During an earlier attempt on 2026-10-29, the doctor reported a missed
 keepalive; Twitch then reported the chat subscription as disconnected. The
 doctor's existing reconnect path does not recreate subscriptions after a new
 welcome. The cause of the missed keepalive and sustained operation remain
 unverified.
+
+In the later main-server test, 33 keepalives were observed before the
+controlled pause. After reconnecting, the local health endpoint reported
+`reconnecting` even though Twitch listed the new subscriptions as enabled and
+the monitor observed further keepalives. When the monitoring interval ended,
+the temporary server did not exit promptly with the test event stream still
+open and had to be stopped. These observations do not establish the cause.
 
 The successful run's redacted status output is below. Account identifiers,
 credentials and chat contents are omitted.

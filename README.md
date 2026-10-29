@@ -221,12 +221,14 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 | Grounding rejects invented ids and URLs; falls back to the local voice | ✅ `test/contract.test.js`, `test/session.test.js` |
 | Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
 | Live Twitch intake (doctor; real token, channel and message) | ✅ On 2026-10-29, the doctor received a real chat event and exited 0. Account details and the message were omitted from the evidence. |
-| Sustained live connection and overlay | ⏳ A live overlay/audio run still needs verification. An earlier doctor attempt missed a keepalive and did not restore its subscriptions after reconnecting. |
+| Live app to overlay event stream | ✅ On 2026-10-29, a real chat event reached the app and an insufficient-chat answer was emitted on the overlay event stream. Browser display and audio remain unchecked. |
+| Live reconnection | ⏳ After a controlled pause, the main server recreated its Twitch subscriptions and received keepalives, but its status still said `reconnecting`. The doctor also did not resubscribe in an earlier attempt. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
 | TTS on stage | ⏳ browser playback and `?mute=1` still need a runtime check on the machine that will stream |
 
-The doctor verifies that a real chat event reaches the EventSub client; it does
-not by itself verify a live overlay or sustained connection. See the
+The doctor verifies that a real chat event reaches the EventSub client; the app
+test also reached the overlay event stream, but did not verify a real browser
+display or audio. See the
 [verification evidence](docs/VERIFICATION.md) for the recorded checks and
 remaining manual checks.
 
