@@ -8,6 +8,7 @@ denied those binds, and the runs below succeeded with that permission.
 | Check | Command or evidence | Result | Source |
 | --- | --- | --- | --- |
 | Baseline tests | `npm test` | 83 passing, 0 failing | Local, Node v25.2.1 |
+| Tests after reconnect fixes, 2026-10-29 | `npm test` | 88 passing, 0 failing | Local, Node v25.2.1 |
 | CI at `78031f4` | [GitHub Actions run 40671836604](https://github.com/zalkabsi/ACCLAMATION/actions/runs/40671836604) | Node 22.19 and 24 jobs passed, including tests and replay | CI |
 | Consensus replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/consensus.jsonl --speed 100000` | CONSENSUS; 87% confidence; local voice | Local |
 | Dissent replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000` | DISSENT; split 43/29; local voice | Local |
@@ -20,12 +21,13 @@ denied those binds, and the runs below succeeded with that permission.
 | Live Twitch intake, 2026-10-29 | `npm run doctor -- --wait=300`, through a redacting wrapper with debug logging | A real chat event arrived and the doctor exited 0. All six subscriptions were created. This proves receipt by the doctor, not a live overlay or sustained operation. | Live, Node v25.2.1 |
 | Live app and event stream, 2026-10-29 | `src/server/main.js`, localhost, in-memory storage and local voice; redacted monitor | A real chat message was accepted; triggering with one chatter returned `insufficient` and emitted `chat`, `trigger:start` and `answer` on the event stream. A real browser display and audio were not observed. | Live, Node v25.2.1 |
 | Main-server reconnect, 2026-10-29 | Seven-minute live monitor with a 25-second controlled process pause | After the pause, Twitch reported all six new subscriptions enabled and fresh keepalives arrived. The server's reported status nevertheless remained `reconnecting`; a post-reconnect chat message was not observed. | Live, controlled test |
+| Main-server reconnect after fix, 2026-10-29 | Redacted live monitor with a 25-second controlled process pause and an open event stream | Twitch reported all six new subscriptions enabled; the app reported `connected` and received keepalives. The monitor then stopped cleanly with exit 0. No post-reconnect chat was observed. | Live, controlled test |
+| Doctor reconnect after fix, 2026-10-29 | `npm run doctor -- --wait=30` through a redacting wrapper that forced one client reconnect | All six subscriptions were created again for the new session. No chat arrived within 30 seconds, so the doctor exited 1; this test verifies subscription recovery, not post-reconnect chat delivery. | Live, instrumented test |
 
 During an earlier attempt on 2026-10-29, the doctor reported a missed
-keepalive; Twitch then reported the chat subscription as disconnected. The
-doctor's existing reconnect path does not recreate subscriptions after a new
-welcome. The cause of the missed keepalive and sustained operation remain
-unverified.
+keepalive; Twitch then reported the chat subscription as disconnected. At that
+time the doctor's reconnect path did not recreate subscriptions after a new
+welcome. The cause of the missed keepalive remains unverified.
 
 In the later main-server test, 33 keepalives were observed before the
 controlled pause. After reconnecting, the local health endpoint reported

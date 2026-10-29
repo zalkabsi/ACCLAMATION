@@ -60,7 +60,7 @@ Requires **Node 22.19+**. There are no dependencies to install (the runtime is
 Node's built-in WebSocket, HTTP and SQLite).
 
 ```bash
-npm test                                  # 83 tests, no network
+npm test                                  # 88 tests, no network
 npm run replay                            # consensus fixture through the whole pipeline
 npm run replay -- --fixture replay/fixtures/dissent.jsonl
 npm run replay -- --fixture replay/fixtures/messy.jsonl
@@ -210,7 +210,7 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 
 | Claim | Status |
 | --- | --- |
-| 83 tests, no network, no API key | ✅ `npm test` |
+| 88 tests, no network, no API key | ✅ `npm test` |
 | Runs on Node 22.19 (minimum) through Node 25 | ✅ full suite executed on 22.19 and 25; CI matrix covers 22.19 + 24 |
 | Real EventSub client against a real WebSocket implementation (fake server) | ✅ `test/eventsub.test.js` |
 | Reconnect + keepalive-watchdog paths | ✅ tested at sub-second keepalives |
@@ -222,7 +222,7 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 | Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
 | Live Twitch intake (doctor; real token, channel and message) | ✅ On 2026-10-29, the doctor received a real chat event and exited 0. Account details and the message were omitted from the evidence. |
 | Live app to overlay event stream | ✅ On 2026-10-29, a real chat event reached the app and an insufficient-chat answer was emitted on the overlay event stream. Browser display and audio remain unchecked. |
-| Live reconnection | ⏳ After a controlled pause, the main server recreated its Twitch subscriptions and received keepalives, but its status still said `reconnecting`. The doctor also did not resubscribe in an earlier attempt. |
+| Live reconnect subscription recovery | ✅ After a controlled pause, Twitch showed all six subscriptions enabled, the app reported `connected` and keepalives resumed. A separate doctor probe recreated all six subscriptions after a forced reconnect. Post-reconnect chat delivery remains unchecked. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
 | TTS on stage | ⏳ browser playback and `?mute=1` still need a runtime check on the machine that will stream |
 
@@ -247,7 +247,7 @@ web/                      control-room dashboard
 replay/                   fake EventSub server + JSONL fixtures
 scripts/                  OAuth and the live doctor
 docs/                     demo script, safety notes, submission copy, screenshots
-test/                     83 tests
+test/                     88 tests
 ```
 
 ## Demo

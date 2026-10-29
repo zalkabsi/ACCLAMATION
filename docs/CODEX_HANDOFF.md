@@ -12,14 +12,15 @@ work, so the thread is genuinely part of the build.
 > Read `AGENTS.md` before doing anything. This repo is **Acclamation**, a Twitch
 > tool: it collapses live chat into one character using EventSub, measures the
 > room's stance by clustering, and answers through an OBS overlay in one voice
-> (or two, in split mode). It has zero runtime dependencies and 83 network-free
+> (or two, in split mode). It has zero runtime dependencies and 88 network-free
 > tests.
 >
 > Current state: `npm test` is green; `npm run replay` works offline; the repo is
 > pushed and CI runs on Node 22.19 + 24. On 2026-10-29 the doctor received a real
 > Twitch chat event. A separate live app test emitted an answer on the overlay
-> event stream. Browser display and audio remain unchecked; reconnect status
-> needs investigation. Credentials may be present in `.env` (never commit it).
+> event stream. The doctor and app restored subscriptions during controlled
+> reconnect tests, but post-reconnect chat and browser display/audio remain
+> unchecked. Credentials may be present in `.env` (never commit it).
 >
 > Work through the tasks below in order. Keep every test green, add tests for new
 > behavior, and commit per task. Do not add runtime dependencies. Do not weaken
@@ -31,12 +32,11 @@ work, so the thread is genuinely part of the build.
 
 1. **Baseline.** Run `npm test` and `node --disable-warning=ExperimentalWarning
    replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000`.
-   Confirm 83 passing tests and the dissent answer.
-2. **Live doctor — real chat received; reconnect issue pending.** On 2026-10-29,
-   the doctor received a real chat event and exited 0. An earlier attempt missed
-   a keepalive and the doctor did not recreate its subscriptions after
-   reconnecting. In a separate main-server test, subscriptions were recreated
-   after a forced pause but the reported status remained `reconnecting`.
+   Confirm 88 passing tests and the dissent answer.
+2. **Live doctor — real chat received; recovery tested.** On 2026-10-29, the
+   doctor received a real chat event and exited 0. After fixes, controlled Twitch
+   reconnect tests restored all six subscriptions for both the doctor and the
+   main server. The app reported `connected`; no post-reconnect chat was observed.
 3. **Done — record the proof.** The README, `docs/DEMO.md` and
    `docs/VERIFICATION.md` record the successful doctor run. Account identifiers,
    credentials and chat text are omitted.
@@ -56,7 +56,7 @@ work, so the thread is genuinely part of the build.
 
 ## Definition of done
 
-- `npm test` green (83 tests), `npm run replay` still works.
+- `npm test` green (88 tests), `npm run replay` still works.
 - Doctor prints a real chat message; README status table reflects it honestly.
 - One commit per task, conventional messages.
 - `/status` in this thread copied into the submission.

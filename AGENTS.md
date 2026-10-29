@@ -41,7 +41,7 @@ This file is the contract for anyone (human or Codex) changing the code.
 
 | Command | What it does |
 | --- | --- |
-| `npm test` | 83 tests, no network, ~1.5s |
+| `npm test` | 88 tests, no network, ~1.5s |
 | `npm start` | dashboard on `http://127.0.0.1:8787`, overlay on `/overlay` |
 | `npm run replay` | offline fixture through the real EventSub client + full pipeline |
 | `npm run replay -- --fixture replay/fixtures/dissent.jsonl` | split-mode demo |
@@ -130,7 +130,7 @@ configuration on purpose; authorize the channel you stream on.
 | `overlay/` | canvas glyph swarm, face mask, dissent fracture, SSE |
 | `web/` | control room dashboard |
 | `scripts/auth.js`, `scripts/doctor.js` | OAuth and the day-one gate |
-| `test/` | 83 tests, network-free |
+| `test/` | 88 tests, network-free |
 
 Request flow:
 
@@ -170,6 +170,10 @@ glyphs reacting before the text lands. The face must never wait on the model.
 - `test/eventsub.test.js` runs the production client against the fake server,
   including reconnect and keepalive-watchdog paths (sub-second keepalives are a
   test affordance; real Twitch enforces ≥10s).
+- `test/doctor.test.js` checks resubscription after a fresh session, session
+  transfers and cleanup when chat arrives while subscriptions are in flight.
+- `test/live-server.test.js` checks the displayed connection status across
+  reconnects and shutdown with an open overlay event stream.
 - `test/session.test.js` stubs the model to prove grounded receipts, repair,
   fallback, refusal and the "one answer at a time" lock.
 - `test/replay.test.js` runs the whole pipeline against real fixtures and

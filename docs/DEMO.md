@@ -8,19 +8,18 @@ The video is capped at 3:00 and must show the project **working on Twitch** and
 ## Pre-flight (10 minutes before)
 
 ```bash
-npm test                         # 83 green
+npm test                         # 88 green
 npm run doctor                   # must print a real chat message; otherwise use the replay fallback
 npm start                        # dashboard + overlay up
 ```
 
-On 2026-10-29, `npm run doctor -- --wait=300` received a real Twitch chat
-event and exited 0. One earlier attempt missed a keepalive, after which the
-doctor did not recreate its subscriptions on reconnect. In a separate test,
-the live app ingested a real chat event and emitted an insufficient-chat answer
-on the overlay event stream. After a forced pause, the app recreated its Twitch
-subscriptions but still displayed a `reconnecting` status. Run the pre-flight
-again before recording; the live overlay and browser audio still need their own
-runtime check. See [verification evidence](VERIFICATION.md).
+On 2026-10-29, `npm run doctor -- --wait=300` received a real Twitch chat event
+and exited 0. In a separate test, the app ingested a real chat event and emitted
+an insufficient-chat answer on the overlay event stream. After reconnect fixes,
+controlled live tests restored all six subscriptions for the app and doctor;
+the app reported `connected`. No post-reconnect chat was observed. Run the
+pre-flight again before recording; the live overlay and browser audio still
+need their own runtime check. See [verification evidence](VERIFICATION.md).
 
 Redacted output from that run:
 
@@ -55,7 +54,7 @@ DOCTOR_EXIT: 0
 | 1:15 | Dashboard | Show **Held back** panel: deleted, links, bots | "Everything unsafe is scrubbed before the model sees it. Deleted messages never become receipts." |
 | 1:25 | Dashboard | Pin lore: "chat still calls the 20-choke run"; trigger again | "It remembers the channel. Tomorrow it still knows what chat called." |
 | 1:35 | Scoreboard | Click **Chat wins** | "A running record. The streamer finally has a rival: their own audience." |
-| 1:45 | Codex | Show `AGENTS.md`, `npm test` running, one Codex thread | "Built with Codex: the EventSub client, a fake EventSub server so we could build offline, the overlay, and 83 tests." |
+| 1:45 | Codex | Show `AGENTS.md`, `npm test` running, the follow-up Codex thread | "Codex helped add semantic clustering, moderation and reconnect fixes. The project has 88 tests." |
 | 2:10 | Repo | Show README + repo URL | "Zero dependencies. `npm test`, `npm run replay`, `npm start` — and the doctor proves the live leg before you trust it." |
 | 2:25 | Cold close | Overlay idle | "Your chat has a word. Now it has a voice." |
 

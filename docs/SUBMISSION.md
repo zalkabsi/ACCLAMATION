@@ -66,7 +66,7 @@ clustered share of unique chatters — the model is forbidden from returning one
 
 In a documented follow-up thread, Codex worked from `AGENTS.md` to add opt-in
 embedding clustering and ban/unban scrubbing, then helped verify the project.
-The suite has 83 network-free tests, and a real Twitch chat event reached the
+The suite has 88 network-free tests, and a real Twitch chat event reached the
 doctor. The original project was already present when that follow-up began.
 
 **Follow-up session ID:** `01a181e5-4d0e-7793-a5de-07af087f8982`.
@@ -95,7 +95,7 @@ review; the streamer installs a URL and talks to their chat.
 EventSub subscription versions and conditions, safety invariants, the latency
 budget, and the file map. In the documented follow-up thread, Codex added
 semantic clustering and ban/unban scrubbing with tests. The repository also has
-a fake EventSub WebSocket server for offline development, and the suite has 83
+a fake EventSub WebSocket server for offline development, and the suite has 88
 tests with no network or API key. Confirm the original build thread and its ID
 before making claims about that part of the work.
 
@@ -150,7 +150,7 @@ then pin one line and settle the score after the game.
    and deterministic tests (`eddcdc1`).
 3. **Moderation.** Codex added ban/unban subscription handling and tests for
    scrubbing affected users from the window (`155f1cf`).
-4. **Verification.** The follow-up recorded the replay fixtures, the 83-test
+4. **Verification.** The follow-up recorded the replay fixtures, the 88-test
    suite and CI on Node 22.19 and 24. The doctor received a real Twitch chat
    event, and a separate app test emitted an answer on the overlay event stream;
    browser display and audio still need a manual check.
@@ -225,7 +225,7 @@ deliberate scope choice, not an omission.
 
 - A split-mode moment that is genuinely new on a Twitch stream: one chat, two
   voices, one face breaking in half.
-- 83 tests covering clustering, ingestion filters, the JSON contract, the
+- 88 tests covering clustering, ingestion filters, the JSON contract, the
   EventSub state machine (including reconnect and keepalive watchdog) and the
   full replay pipeline.
 - A live-leg doctor that refuses to say "working" until a real chat message
@@ -284,7 +284,7 @@ canvas, SQLite.
 ## Judge test instructions (put this in the Devpost description or a pinned file)
 
 1. `git clone` the repo; Node 22.19+.
-2. `npm test` → 83 tests pass, no network, no API key.
+2. `npm test` → 88 tests pass, no network, no API key.
 3. `npm run replay` → prints a measured consensus answer with receipts and
    held-back counts.
 4. `npm run replay -- --fixture replay/fixtures/dissent.jsonl` → split mode.
