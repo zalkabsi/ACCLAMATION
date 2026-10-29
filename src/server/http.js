@@ -135,8 +135,7 @@ export function createApp({ config, session, memory, logger, connection = () => 
   }, 15000);
   heartbeat.unref?.();
 
-  server.on('close', () => {
-    clearInterval(heartbeat);
+  const closeStreams = () => {
     for (const res of clients) {
       try {
         res.end();
@@ -145,9 +144,14 @@ export function createApp({ config, session, memory, logger, connection = () => 
       }
     }
     clients.clear();
+  };
+
+  server.on('close', () => {
+    clearInterval(heartbeat);
+    closeStreams();
   });
 
-  return { server, broadcast, clients };
+  return { server, broadcast, clients, closeStreams };
 }
 
 function stream(res, { session, connection, config, clients }) {

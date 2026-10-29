@@ -1,3 +1,4 @@
+import { pathToFileURL } from 'node:url';
 import { ChannelSession } from '../core/session.js';
 import { ChatWindow } from '../chat/window.js';
 import { Scrubber } from '../chat/scrub.js';
@@ -15,7 +16,12 @@ import { createApp } from './http.js';
  * In live mode it keeps its EventSub session subscribed across reconnects; in
  * sample mode it still serves the UI and says clearly that chat is not wired.
  */
-export async function startApp({ config, logger: providedLogger } = {}) {
+export async function startApp({
+  config,
+  logger: providedLogger,
+  eventSubFactory = (options) => new EventSubClient(options),
+  helixFactory = (options) => new HelixClient(options),
+} = {}) {
   const logger = providedLogger ?? createLogger({ level: process.env.LOG_LEVEL || 'info' });
   const memory = await openMemory({ file: config.memoryPath, channel: config.twitch.channel || 'local', logger });
   const scrubber = new Scrubber(config.safety);
@@ -73,8 +79,8 @@ export async function startApp({ config, logger: providedLogger } = {}) {
         logger.warn('token refresh failed; using stored token', { error: error.message });
       }
     }
-    twitch = new HelixClient({ clientId: config.twitch.clientId, token });
-    eventSub = new EventSubClient({ logger });
+    twitch = helixFactory({ clientId: config.twitch.clientId, token });
+    eventSub = eventSubFactory({ logger });
     connection.status = 'connecting';
 
     let lastSessionId = null;
@@ -110,7 +116,15 @@ export async function startApp({ config, logger: providedLogger } = {}) {
     eventSub.on('keepalive', () => {
       connection.lastKeepaliveAt = Date.now();
     });
-    eventSub.on('close', () => {
+    eventSub.on('close', ({ wasCurrent }) => {
+      // A replaced socket can close after the new session is already live.
+      if (wasCurrent && connection.status !== 'stopped') connection.status = 'reconnecting';
+    });
+    eventSub.on('timeout', ({ phase }) => {
+      // The watchdog detaches the dead socket before its close event arrives.
+      if (phase === 'keepalive' && connection.status !== 'stopped') connection.status = 'reconnecting';
+    });
+    eventSub.on('reconnect', () => {
       if (connection.status !== 'stopped') connection.status = 'reconnecting';
     });
     eventSub.on('socket-error', ({ error }) => {
@@ -128,7 +142,10 @@ export async function startApp({ config, logger: providedLogger } = {}) {
   }
 
   const close = async () => {
+    connection.status = 'stopped';
     eventSub?.stop();
+    // Long-lived SSE responses otherwise prevent server.close() from finishing.
+    app.closeStreams();
     await new Promise((resolve) => app.server.close(resolve));
     memory.close?.();
   };
@@ -162,11 +179,13 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${process.env.PORT || 8787} is already in use. Stop the other server or set PORT.`);
-  } else {
-    console.error(error);
-  }
-  process.exit(1);
-});
+if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
+  main().catch((error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${process.env.PORT || 8787} is already in use. Stop the other server or set PORT.`);
+    } else {
+      console.error(error);
+    }
+    process.exit(1);
+  });
+}
