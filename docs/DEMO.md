@@ -13,6 +13,19 @@ npm run doctor                   # must print a real chat message; otherwise use
 npm start                        # dashboard + overlay up
 ```
 
+On 2026-10-29, `npm run doctor -- --wait=300` received a real Twitch chat
+event and exited 0. One earlier attempt missed a keepalive, after which the
+doctor did not recreate its subscriptions on reconnect. Run the pre-flight
+again before recording; the live overlay and browser audio still need their own
+runtime check. See [verification evidence](VERIFICATION.md).
+
+Redacted output from that run:
+
+```text
+DOCTOR_SUCCESS: REAL CHAT ARRIVED.
+DOCTOR_EXIT: 0
+```
+
 - OBS: browser source → overlay URL, width 1920, height 1080, "Control audio via
   OBS" on.
 - Dashboard on a second monitor or a window capture.

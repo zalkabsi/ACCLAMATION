@@ -1,9 +1,9 @@
 # Verification record
 
-Recorded 2026-10-28. The local commands used Node v25.2.1 and the repository's
-offline fixtures. The tests and replay harness need permission to bind local
-`127.0.0.1` sockets; the restricted sandbox initially denied those binds, and
-the runs below succeeded with that permission.
+The baseline was recorded on 2026-10-28. The local commands used Node v25.2.1
+and the repository's offline fixtures. The tests and replay harness need
+permission to bind local `127.0.0.1` sockets; the restricted sandbox initially
+denied those binds, and the runs below succeeded with that permission.
 
 | Check | Command or evidence | Result | Source |
 | --- | --- | --- | --- |
@@ -16,10 +16,36 @@ the runs below succeeded with that permission.
 | Overlay at 1280×720 | Render the overlay at 1280×720 | Not independently verified in this session; the two checked-in PNGs are 1920×1080. | Manual, pending |
 | Browser voice and `?mute=1` | Exercise both in a browser or OBS | Browser access was unavailable. The source contains the browser speech path and mute guard, but playback and mute behavior have not been runtime-verified. | Manual, pending |
 | Twitch settings, presence only | Check `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and `TWITCH_CHANNEL` | All three are nonempty; values were not displayed or validated. | Local |
-| Live Twitch leg | `npm run auth`, then `npm run doctor -- --wait=90` with chat active | **Not verified.** A token was saved and the doctor validated it, connected, and created all six subscriptions. No chat message arrived within 90 seconds; the doctor exited 1. The auth command also exited 1 after an exchange error despite saving the token. | Live, partial |
+| Live Twitch intake, 2026-10-28 | `npm run auth`, then `npm run doctor -- --wait=90` | Partial: a token was saved and validated, and all six subscriptions were created, but no chat message arrived; doctor exited 1. The auth command also exited 1 after an exchange error despite saving the token. | Live, partial |
+| Live Twitch intake, 2026-10-29 | `npm run doctor -- --wait=300`, through a redacting wrapper with debug logging | A real chat event arrived and the doctor exited 0. All six subscriptions were created. This proves receipt by the doctor, not a live overlay or sustained operation. | Live, Node v25.2.1 |
 
-The live check's sanitized status output is below. Account identifiers,
-credentials, and chat contents are omitted.
+During an earlier attempt on 2026-10-29, the doctor reported a missed
+keepalive; Twitch then reported the chat subscription as disconnected. The
+doctor's existing reconnect path does not recreate subscriptions after a new
+welcome. The cause of the missed keepalive and sustained operation remain
+unverified.
+
+The successful run's redacted status output is below. Account identifiers,
+credentials and chat contents are omitted.
+
+```text
+DOCTOR_TOKEN_OK
+DOCTOR_CHAT_SCOPE_OK
+DOCTOR_CHANNEL_OK
+EVENTSUB_SOCKET_OPEN
+DOCTOR_SOCKET_OK
+DOCTOR_SUBSCRIPTION: channel.chat.message created
+DOCTOR_SUBSCRIPTION: channel.chat.message_delete created
+DOCTOR_SUBSCRIPTION: channel.raid created
+DOCTOR_SUBSCRIPTION: channel.subscribe created
+DOCTOR_SUBSCRIPTION: channel.ban created
+DOCTOR_SUBSCRIPTION: channel.unban created
+DOCTOR_READY: Send one non-sensitive chat message now.
+DOCTOR_SUCCESS: REAL CHAT ARRIVED.
+DOCTOR_EXIT: 0
+```
+
+The earlier live check's sanitized status output is below.
 
 ```text
 AUTH_ERROR: Token exchange or validation failed.

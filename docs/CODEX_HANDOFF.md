@@ -16,8 +16,9 @@ work, so the thread is genuinely part of the build.
 > tests.
 >
 > Current state: `npm test` is green; `npm run replay` works offline; the repo is
-> pushed and CI runs on Node 22.19 + 24. The live Twitch leg is implemented but
-> not yet demonstrated. Credentials may be present in `.env` (never commit it).
+> pushed and CI runs on Node 22.19 + 24. On 2026-10-29 the doctor received a real
+> Twitch chat event. The live overlay and sustained connection still need a
+> runtime check. Credentials may be present in `.env` (never commit it).
 >
 > Work through the tasks below in order. Keep every test green, add tests for new
 > behavior, and commit per task. Do not add runtime dependencies. Do not weaken
@@ -30,14 +31,13 @@ work, so the thread is genuinely part of the build.
 1. **Baseline.** Run `npm test` and `node --disable-warning=ExperimentalWarning
    replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000`.
    Confirm 83 passing tests and the dissent answer.
-2. **Live leg.** If `.env` has `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and
-   `TWITCH_CHANNEL`, run `npm run auth` (browser consent), then
-   `npm run doctor --wait=90` while someone types in chat. Fix anything the
-   doctor reports (scopes, redirect URI, user/channel mismatch, subscription
-   errors). Acceptance: the doctor prints `REAL CHAT ARRIVED`.
-3. **Record the proof.** On success, update the README "What is verified" table:
-   change the live row from ⏳ to ✅ with the date and channel login. Add the
-   doctor output (redact token values) to `docs/DEMO.md` under pre-flight.
+2. **Live doctor — real chat received; reconnect issue pending.** On 2026-10-29,
+   the doctor received a real chat event and exited 0. An earlier attempt missed
+   a keepalive and the doctor did not recreate its subscriptions after
+   reconnecting; sustained operation needs a separate check.
+3. **Done — record the proof.** The README, `docs/DEMO.md` and
+   `docs/VERIFICATION.md` record the successful doctor run. Account identifiers,
+   credentials and chat text are omitted.
 4. **Done — embedding clustering** (`eddcdc1`). `clusterMessages` uses cosine
    similarity with an opt-in embedding provider and
    falls back to lexical clustering. Deterministic tests cover paraphrases and

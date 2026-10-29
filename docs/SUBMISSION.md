@@ -82,8 +82,9 @@ rather than decorative.
 **Twitch is the product surface.** Acclamation is designed to authenticate
 through Twitch OAuth, open an EventSub WebSocket session, and consume
 `channel.chat.message`, `channel.chat.message_delete`, `channel.raid`,
-`channel.subscribe`, `channel.ban` and `channel.unban` live. The live Twitch
-leg has not yet been verified; `npm run doctor` is the gate for a real message.
+`channel.subscribe`, `channel.ban` and `channel.unban` live. On 2026-10-29,
+`npm run doctor` received a real chat event; a live overlay and audio run still
+needs to be verified.
 The offline replay feeds fixtures through a fake EventSub server. It ships as
 an OBS browser-source overlay, which means no Extension review and no chatbot
 review; the streamer installs a URL and talks to their chat.
