@@ -10,6 +10,7 @@ denied those binds, and the runs below succeeded with that permission.
 | Baseline tests | `npm test` | 83 passing, 0 failing | Local, Node v25.2.1 |
 | Tests after reconnect fixes, 2026-10-29 | `npm test` | 88 passing, 0 failing | Local, Node v25.2.1 |
 | CI at `78031f4` | [GitHub Actions run 40671836604](https://github.com/zalkabsi/ACCLAMATION/actions/runs/40671836604) | Node 22.19 and 24 jobs passed, including tests and replay | CI |
+| CI after reconnect fixes, `699273e` | [GitHub Actions run 40911622128](https://github.com/zalkabsi/ACCLAMATION/actions/runs/40911622128) | Node 22.19 and 24 jobs passed, including tests and replay | CI |
 | Consensus replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/consensus.jsonl --speed 100000` | CONSENSUS; 87% confidence; local voice | Local |
 | Dissent replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000` | DISSENT; split 43/29; local voice | Local |
 | Messy replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/messy.jsonl --speed 100000` | INSUFFICIENT; 3 chatters; 12 blocked | Local |
