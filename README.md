@@ -217,14 +217,14 @@ EventSub WebSocket ──► ChatWindow ──► clusters ──► prompt ─�
 | Full pipeline through replay fixtures, including delete-scrubbing | ✅ `test/replay.test.js` |
 | Embedding clustering and lexical fallback | ✅ deterministic fake embeddings in `test/cluster.test.js`, `test/embeddings.test.js`; no live provider required |
 | Ban/unban subscription shapes and window scrubbing | ✅ `test/helix.test.js`, `test/window.test.js`, `test/session.test.js` |
-| Overlay renders consensus and dissent faces at 1920×1080 | ✅ existing screenshots (`docs/overlay-consensus.png`, `docs/overlay-dissent.png`); 1280×720 recheck pending |
+| Overlay renders complete consensus and dissent faces at 1280×720 and 1920×1080 | ✅ replay browser checks on 2026-10-30; full faces and separated receipts at both sizes; [evidence](docs/VERIFICATION.md#browser-replay-checks-2026-10-30) |
 | Grounding rejects invented ids and URLs; falls back to the local voice | ✅ `test/contract.test.js`, `test/session.test.js` |
 | Helix subscription bodies and conditions (the live leg's request shapes) | ✅ `test/helix.test.js` with a stubbed Twitch API |
 | Live Twitch intake (doctor; real token, channel and message) | ✅ On 2026-10-29, the doctor received a real chat event and exited 0. Account details and the message were omitted from the evidence. |
 | Live app to overlay event stream | ✅ On 2026-10-29, a real chat event reached the app and an insufficient-chat answer was emitted on the overlay event stream. Browser display and audio remain unchecked. |
 | Live reconnect subscription recovery | ✅ After a controlled pause, Twitch showed all six subscriptions enabled, the app reported `connected` and keepalives resumed. A separate doctor probe recreated all six subscriptions after a forced reconnect. Post-reconnect chat delivery remains unchecked. |
 | Model wording quality | ⏳ the local voice is exercised in tests; a real model run needs `LLM_API_KEY` |
-| TTS on stage | ⏳ browser playback and `?mute=1` still need a runtime check on the machine that will stream |
+| Browser speech and `?mute=1` | ✅ native speech start/end events observed in replay; muted triggers made zero speech calls. Audible output through OBS still needs a check on the streaming machine. |
 
 The doctor verifies that a real chat event reaches the EventSub client; the app
 test also reached the overlay event stream, but did not verify a real browser

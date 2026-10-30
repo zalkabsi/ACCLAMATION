@@ -18,8 +18,11 @@ and exited 0. In a separate test, the app ingested a real chat event and emitted
 an insufficient-chat answer on the overlay event stream. After reconnect fixes,
 controlled live tests restored all six subscriptions for the app and doctor;
 the app reported `connected`. No post-reconnect chat was observed. Run the
-pre-flight again before recording; the live overlay and browser audio still
-need their own runtime check. See [verification evidence](VERIFICATION.md).
+pre-flight again before recording. On 2026-10-30, replay browser checks showed
+complete faces and separated receipts at 1280×720 and 1920×1080, native speech
+start/end events, and zero speech calls with `?mute=1`. Live Twitch browser
+footage and an audible OBS check remain separate recording steps. See
+[verification evidence](VERIFICATION.md#browser-replay-checks-2026-10-30).
 
 Redacted output from that run:
 

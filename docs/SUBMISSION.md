@@ -86,7 +86,10 @@ through Twitch OAuth, open an EventSub WebSocket session, and consume
 `channel.subscribe`, `channel.ban` and `channel.unban` live. On 2026-10-29,
 `npm run doctor` received a real chat event. A separate live app test ingested a
 real message and emitted an insufficient-chat answer on the overlay event
-stream; browser display and audio still need to be verified.
+stream. On 2026-10-30, offline replay browser checks showed complete faces and
+separated receipts at 1280×720 and 1920×1080, native speech start/end events,
+and zero speech calls with `?mute=1`. Live browser footage and audible OBS
+output remain recording checks.
 The offline replay feeds fixtures through a fake EventSub server. It ships as
 an OBS browser-source overlay, which means no Extension review and no chatbot
 review; the streamer installs a URL and talks to their chat.
@@ -153,7 +156,9 @@ then pin one line and settle the score after the game.
 4. **Verification.** The follow-up recorded the replay fixtures, the 88-test
    suite and CI on Node 22.19 and 24. The doctor received a real Twitch chat
    event, and a separate app test emitted an answer on the overlay event stream;
-   browser display and audio still need a manual check.
+   replay browser rendering, native speech start/end events and `?mute=1` were
+   checked on 2026-10-30. Audible OBS output and live browser footage remain
+   recording checks.
 
 The original project predated the documented follow-up. Confirm the original
 build thread and its session ID before describing work from that thread.
@@ -310,13 +315,15 @@ without `.env`, `.tokens.json`, `.data/`, `node_modules` or an API key.
 - [x] Repo is public (confirmed through the GitHub API on 2026-10-30)
 - [x] `npm test` green from a clean clone: 88 passing, 0 failing
 - [x] All three replay fixtures work with no API key
-- [ ] Browser overlay checked at 1280×720 and 1920×1080, including receipts,
-      browser speech and `?mute=1`
+- [x] Replay browser overlay checked at 1280×720 and 1920×1080, including
+      separated receipts, native speech start/end events and zero speech calls
+      with `?mute=1`; audible OBS output remains a recording check
 - [ ] 3-minute video uploaded to YouTube, public, shows the overlay running and
       Codex usage
-- [ ] Codex session ID copied from `/status` (the thread where most of the build
-      happened)
-- [x] Description records observed live intake and the remaining browser checks
+- Codex session ID: the user reports the field is already complete. It was left
+  unchanged and was not independently inspected.
+- [x] Description distinguishes live intake, replay browser checks and remaining
+      live footage / audible OBS checks
 - [x] Twitch app redirect URI is `http://localhost:8917/callback` in the README
 - [x] No `.env`, `.tokens.json` or `.data/` tracked in the checked commit
 
@@ -325,3 +332,10 @@ request the session ID from the thread where most of the build happened and a
 public YouTube video showing Twitch functionality and Codex use. The
 [official rules](https://twitchcon-codex.devpost.com/rules) give the deadline as
 November 2, 2026, 2:00 pm PST (November 3, 1:00 am in Riyadh).
+
+On 2026-10-30, the official rules were read in the built-in browser. They
+require a public YouTube video under three minutes showing Twitch functionality
+and Codex use. The user is handling video upload and Devpost submission. No
+submission fields, binding agreements or submission status were changed. The
+existing `dist/acclamation-demo-88-draft/acclamation-demo.mp4` remains an offline
+replay draft; it has not been replaced with a final video containing live footage.

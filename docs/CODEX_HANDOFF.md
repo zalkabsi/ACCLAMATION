@@ -48,11 +48,12 @@ work, so the thread is genuinely part of the build.
    `broadcaster_user_id` and optional `channel:moderate`; notifications route
    through `session.ingest`, and tests cover scrubbing and unban. The doctor
    reports the subscription results.
-6. **Demo polish.** At 1280×720 and 1920×1080, confirm the overlay renders a full
-   face (the mask shuffle fix) and receipts don't overlap. If `TTS_PROVIDER=openai`
-   is configured, verify `/api/tts` streams; otherwise confirm the browser voice
-   path and `?mute=1`. The checked-in overlay screenshots are 1920×1080; the
-   1280×720 and browser audio checks still need independent verification.
+6. **Done — replay demo polish, 2026-10-30.** The built-in browser showed
+   complete consensus and dissent faces with separated receipts at 1280×720 and
+   1920×1080. Native speech start/end events were observed; `?mute=1` made zero
+   speech calls. The 1080p check used an exact-size iframe because the browser
+   viewport override did not take effect. Audible OBS output and fresh live
+   Twitch footage remain recording checks. See [evidence](VERIFICATION.md#browser-replay-checks-2026-10-30).
 
 ## Definition of done
 

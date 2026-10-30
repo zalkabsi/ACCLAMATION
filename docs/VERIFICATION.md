@@ -16,9 +16,11 @@ denied those binds, and the runs below succeeded with that permission.
 | Consensus replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/consensus.jsonl --speed 100000` | CONSENSUS; 87% confidence; local voice | Local |
 | Dissent replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/dissent.jsonl --speed 100000` | DISSENT; split 43/29; local voice | Local |
 | Messy replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/messy.jsonl --speed 100000` | INSUFFICIENT; 3 chatters; 12 blocked | Local |
-| Overlay at 1920×1080 | [Consensus screenshot](overlay-consensus.png), [dissent screenshot](overlay-dissent.png) | Both existing PNGs are 1920×1080. Manual inspection shows complete faces and separated receipts. | Manual, existing images |
-| Overlay at 1280×720 | Render the overlay at 1280×720 | Not independently verified in this session; the two checked-in PNGs are 1920×1080. | Manual, pending |
-| Browser voice and `?mute=1` | Exercise both in a browser or OBS | Browser access was unavailable. The source contains the browser speech path and mute guard, but playback and mute behavior have not been runtime-verified. | Manual, pending |
+| Overlay at 1920×1080, 2026-10-30 | Exact-size iframe; [consensus](verification-2026-10-30/consensus-1920x1080-iframe.jpg), [dissent](verification-2026-10-30/dissent-1920x1080-iframe.jpg) | Browser-reported frame size 1920×1080; complete faces and separated receipts in both modes. The images show the frame scaled to fit the diagnostic page. | Built-in browser, offline replay |
+| Overlay at 1280×720, 2026-10-30 | [Consensus](verification-2026-10-30/consensus-1280x720.jpg), [dissent](verification-2026-10-30/dissent-1280x720.jpg) | Actual page dimensions 1280×720; complete faces and separated receipts in both modes. | Built-in browser, offline replay |
+| Browser voice and `?mute=1`, 2026-10-30 | Native speech events observed with a pass-through probe | Isolated consensus and dissent utterances started and ended. Muted triggers made zero speech calls. This does not verify audible OBS output. | Built-in browser, offline replay |
+| Tests repeated, 2026-10-30 | `npm test` | 88 passing, 0 failing, Node v25.2.1, 1499.65 ms; local socket permission required. | Local |
+| CI at `cf1b297` | [GitHub Actions run 41024849116](https://github.com/zalkabsi/ACCLAMATION/actions/runs/41024849116) | Completed successfully. | CI |
 | Twitch settings, presence only | Check `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` and `TWITCH_CHANNEL` | All three are nonempty; values were not displayed or validated. | Local |
 | Live Twitch intake, 2026-10-28 | `npm run auth`, then `npm run doctor -- --wait=90` | Partial: a token was saved and validated, and all six subscriptions were created, but no chat message arrived; doctor exited 1. The auth command also exited 1 after an exchange error despite saving the token. | Live, partial |
 | Live Twitch intake, 2026-10-29 | `npm run doctor -- --wait=300`, through a redacting wrapper with debug logging | A real chat event arrived and the doctor exited 0. All six subscriptions were created. This proves receipt by the doctor, not a live overlay or sustained operation. | Live, Node v25.2.1 |
@@ -78,6 +80,69 @@ DOCTOR_SUBSCRIPTION: channel.unban created
 DOCTOR_NO_CHAT_MESSAGE
 DOCTOR_EXIT: 1
 ```
+
+## Browser replay checks, 2026-10-30
+
+The production overlay was exercised in the built-in browser against the real
+replay server, using the consensus and dissent fixtures, local voice, no
+embeddings and in-memory storage. `WINDOW_SECONDS=600` kept the fixture messages
+available during the checks. Both pages displayed **REPLAY**. These are offline
+checks, not new live Twitch footage. The replay answers took 2 ms (consensus)
+and 3 ms (dissent) at server startup, with 0 ms model time.
+
+At 1280×720, the actual page dimensions and receipt rectangles were read from
+the rendered DOM. The consensus receipt cards had 10 px horizontal gaps. Visual
+inspection showed a complete head, both eyes, nose, mouth and jaw; both dissent
+faces were complete and their receipt columns were separated.
+
+The browser viewport override did not change the actual page dimensions. For
+1920×1080, a temporary localhost harness instead loaded the same overlay files
+in an iframe with that exact internal size, scaled down for display. A script
+inside the frame reported `innerWidth` and `innerHeight` as `[1920,1080]`.
+Screenshots preserve that size report alongside the rendered overlay. Complete
+faces and separated receipts were observed in both modes. No production files
+were changed to obtain these results.
+
+The same harness observed the native speech engine without replacing it:
+a pass-through wrapper counted `speechSynthesis.speak` calls and listened for
+utterance `start`, `end` and `error` events. The browser reported 180 available
+voices. After clicking inside the overlay and triggering through the real API,
+an isolated consensus utterance at 1280×720 and an isolated dissent utterance
+at 1920×1080 each completed with:
+
+```json
+{"calls":1,"starts":1,"ends":1,"errors":[]}
+```
+
+The recorded counters are available for [720p speech](verification-2026-10-30/speech-1280x720.json)
+and [1080p speech](verification-2026-10-30/speech-1920x1080.json).
+
+With `?mute=1`, triggering still displayed the answer and animated the face but
+left the speech counters at:
+
+```json
+{"calls":0,"starts":0,"ends":0,"errors":[]}
+```
+
+The muted counters are recorded for [720p](verification-2026-10-30/mute-1280x720.json)
+and [1080p](verification-2026-10-30/mute-1920x1080.json).
+
+Earlier overlapping speech checks produced `interrupted`/`canceled` events
+when another trigger or overlay canceled the browser's shared speech queue.
+The isolated checks above completed. No audible listening test, OBS audio
+capture, server-side TTS request or new live Twitch browser check is claimed.
+
+Computer Use inventory connected. The requested `computer-use.enabled` setting
+was already `true`; configuration and app permissions were left unchanged.
+Native Brave selection first timed out, then reported that Computer Use
+permissions were not granted. Native control was not retried after that result;
+the user switched the task to the built-in browser, which worked.
+
+The official [hackathon rules](https://twitchcon-codex.devpost.com/rules) were
+read in that browser. YouTube and Devpost showed login pages. The user then took
+over video upload and submission and requested completion of project checks
+only. No form fields, session ID, agreements or submission state were changed.
+The existing video remains an offline replay draft.
 
 ## Captured baseline output
 
