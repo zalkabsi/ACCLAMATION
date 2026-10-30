@@ -9,6 +9,8 @@ denied those binds, and the runs below succeeded with that permission.
 | --- | --- | --- | --- |
 | Baseline tests | `npm test` | 83 passing, 0 failing | Local, Node v25.2.1 |
 | Tests after reconnect fixes, 2026-10-29 | `npm test` | 88 passing, 0 failing | Local, Node v25.2.1 |
+| Clean-clone tests, 2026-10-30, `657cc62` | `git clone --local --no-hardlinks`; `env ACCLAMATION_PROVIDER=local ACCLAMATION_EMBEDDINGS=none LLM_API_KEY= npm test` | 88 passing, 0 failing; no credential files, data directory or `node_modules` present; zero runtime dependencies | Local, Node v25.2.1 |
+| Clean-clone replays, 2026-10-30, `657cc62` | Run each fixture with `--speed 100000`, local provider and an empty API key | Consensus: 87%; dissent: 43/29; messy: insufficient, 3 chatters, 12 blocked; all exited 0 | Local, Node v25.2.1 |
 | CI at `78031f4` | [GitHub Actions run 40671836604](https://github.com/zalkabsi/ACCLAMATION/actions/runs/40671836604) | Node 22.19 and 24 jobs passed, including tests and replay | CI |
 | CI after reconnect fixes, `699273e` | [GitHub Actions run 40911622128](https://github.com/zalkabsi/ACCLAMATION/actions/runs/40911622128) | Node 22.19 and 24 jobs passed, including tests and replay | CI |
 | Consensus replay | `node --disable-warning=ExperimentalWarning replay/replay.js --fixture replay/fixtures/consensus.jsonl --speed 100000` | CONSENSUS; 87% confidence; local voice | Local |

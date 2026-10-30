@@ -303,15 +303,25 @@ collaborator and confirm the invitation is accepted.
 
 ## Submission checklist
 
-- [ ] Repo contains source, fixtures, `AGENTS.md`, README, `.env.example`
-- [x] Repo is public (re-check in a logged-out window)
-- [ ] `npm test` green from a clean clone (no `node_modules` needed)
-- [ ] `npm run replay` works with no API key
+Local checks were repeated on 2026-10-30 from a clean local clone of `657cc62`,
+without `.env`, `.tokens.json`, `.data/`, `node_modules` or an API key.
+
+- [x] Repo contains source, fixtures, `AGENTS.md`, README, `.env.example`
+- [x] Repo is public (confirmed through the GitHub API on 2026-10-30)
+- [x] `npm test` green from a clean clone: 88 passing, 0 failing
+- [x] All three replay fixtures work with no API key
+- [ ] Browser overlay checked at 1280×720 and 1920×1080, including receipts,
+      browser speech and `?mute=1`
 - [ ] 3-minute video uploaded to YouTube, public, shows the overlay running and
       Codex usage
 - [ ] Codex session ID copied from `/status` (the thread where most of the build
       happened)
-- [ ] Description mentions the doctor and what is not proven until a live
-      message arrives
-- [ ] Twitch app redirect URI is `http://localhost:8917/callback` in the README
-- [ ] No `.env`, `.tokens.json` or `.data/` committed (`git status` clean of them)
+- [x] Description records observed live intake and the remaining browser checks
+- [x] Twitch app redirect URI is `http://localhost:8917/callback` in the README
+- [x] No `.env`, `.tokens.json` or `.data/` tracked in the checked commit
+
+The [official submission requirements](https://twitchcon-codex.devpost.com/)
+request the session ID from the thread where most of the build happened and a
+public YouTube video showing Twitch functionality and Codex use. The
+[official rules](https://twitchcon-codex.devpost.com/rules) give the deadline as
+November 2, 2026, 2:00 pm PST (November 3, 1:00 am in Riyadh).
